@@ -1,0 +1,147 @@
+@import "tailwindcss";
+
+/* ============================
+   ArogyaDarpan Design System (Tailwind v4 Theme)
+   ============================ */
+
+@theme {
+  --font-heading: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+
+  /* Primary - Calm Teal */
+  --color-primary-50: #edfaf8;
+  --color-primary-100: #d2f3ee;
+  --color-primary-200: #a8e8df;
+  --color-primary-300: #71d5c8;
+  --color-primary-400: #3dbdae;
+  --color-primary-500: #22a699;
+  --color-primary-600: #198578;
+  --color-primary-700: #186a62;
+  --color-primary-800: #185550;
+  --color-primary-900: #184743;
+
+  /* Surfaces */
+  --color-surface: #f8fafb;
+  --color-surface-raised: #ffffff;
+  --color-surface-muted: #f1f4f6;
+
+  /* Borders */
+  --color-border-light: #e5e9ec;
+
+  /* Text Colors */
+  --color-text-primary: #1a2332;
+  --color-text-secondary: #5a6577;
+  --color-text-muted: #8f99a8;
+
+  /* Semantic Colors */
+  --color-success: #10b981;
+  --color-success-light: #d1fae5;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-critical: #ef4444;
+  --color-critical-light: #fee2e2;
+  --color-info: #3b82f6;
+  --color-info-light: #dbeafe;
+
+  /* Radii */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+}
+
+/* ============================
+   Base Reset & Layout Fixes
+   ============================ */
+
+*, ::before, ::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: var(--font-body), 'DM Sans', sans-serif;
+  color: #1a2332;
+  background-color: #f8fafb;
+  line-height: 1.6;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Utility fallbacks to guarantee crisp styling */
+.bg-primary-500 { background-color: #22a699 !important; }
+.bg-primary-600 { background-color: #198578 !important; }
+.bg-primary-50 { background-color: #edfaf8 !important; }
+.bg-primary-100 { background-color: #d2f3ee !important; }
+.text-primary-500 { color: #22a699 !important; }
+.text-primary-600 { color: #198578 !important; }
+.text-primary-700 { color: #186a62 !important; }
+.border-primary-500 { border-color: #22a699 !important; }
+
+.bg-surface { background-color: #f8fafb !important; }
+.bg-surface-raised { background-color: #ffffff !important; }
+.bg-surface-muted { background-color: #f1f4f6 !important; }
+.border-border-light { border-color: #e5e9ec !important; }
+
+.text-text-primary { color: #1a2332 !important; }
+.text-text-secondary { color: #5a6577 !important; }
+.text-text-muted { color: #8f99a8 !important; }
+
+.bg-critical { background-color: #ef4444 !important; }
+.bg-critical-light { background-color: #fee2e2 !important; }
+.bg-success { background-color: #10b981 !important; }
+.bg-success-light { background-color: #d1fae5 !important; }
+.bg-warning { background-color: #f59e0b !important; }
+.bg-warning-light { background-color: #fef3c7 !important; }
+
+/* ============================
+   Custom Animations
+   ============================ */
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 0.3; }
+  100% { transform: scale(0.8); opacity: 0.8; }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 166, 153, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(34, 166, 153, 0); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-pulse-ring { animation: pulse-ring 2s ease-in-out infinite; }
+.animate-breathe { animation: breathe 2.5s ease-in-out infinite; }
+.animate-fade-in-up { animation: fade-in-up 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+/* Custom shadows */
+.shadow-card { box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04); }
+.shadow-card-hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #e5e9ec; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #8f99a8; }
