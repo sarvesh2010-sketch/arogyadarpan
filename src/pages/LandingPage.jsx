@@ -3,9 +3,11 @@ import { motion } from 'framer-motion'
 import {
   Mic, FileText, Brain, ClipboardCheck,
   Stethoscope, ArrowRight, Shield, Globe,
-  ChevronRight, Heart
+  Heart
 } from 'lucide-react'
 import Button from '../components/Button'
+import LanguageSelector from '../components/LanguageSelector'
+import { useLanguage } from '../context/LanguageContext'
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
@@ -16,48 +18,53 @@ const fadeInUp = {
   }),
 }
 
-const flowSteps = [
-  { icon: Mic, label: 'Patient Story', desc: 'Voice + Touch input' },
-  { icon: Brain, label: 'AI Intake', desc: 'Smart structuring' },
-  { icon: FileText, label: 'Medical Records', desc: 'OCR & extraction' },
-  { icon: ClipboardCheck, label: 'Structured History', desc: 'Timeline & signals' },
-  { icon: Stethoscope, label: 'Doctor Review', desc: 'Verify & decide' },
-]
-
-const features = [
-  { icon: Globe, title: 'Multilingual', desc: 'Hindi, English, Punjabi support with voice input' },
-  { icon: Shield, title: 'AI-Assisted, Doctor-Decided', desc: 'AI prepares and explains. The doctor decides.' },
-  { icon: FileText, title: 'Evidence-Backed', desc: 'Every fact traced to its source document or response' },
-  { icon: Heart, title: 'Patient-Friendly', desc: 'Simple language, voice-first, guided experience' },
-]
-
 export default function LandingPage() {
   const navigate = useNavigate()
+  const { t } = useLanguage()
+
+  const flowSteps = [
+    { icon: Mic, label: 'Patient Story', desc: 'Voice + Touch input' },
+    { icon: Brain, label: 'AI Intake', desc: 'Smart structuring' },
+    { icon: FileText, label: 'Medical Records', desc: 'OCR & extraction' },
+    { icon: ClipboardCheck, label: 'Structured History', desc: 'Timeline & signals' },
+    { icon: Stethoscope, label: 'Doctor Review', desc: 'Verify & decide' },
+  ]
+
+  const features = [
+    { icon: Globe, title: '10+ Indian Languages', desc: 'Hindi, Bengali, Tamil, Telugu, Marathi, Gujarati, Kannada, Punjabi, Malayalam & English with speech AI' },
+    { icon: Shield, title: 'AI-Assisted, Doctor-Decided', desc: 'AI prepares and explains. The doctor decides.' },
+    { icon: FileText, title: 'Evidence-Backed', desc: 'Every fact traced to its source document or response' },
+    { icon: Heart, title: 'Patient-Friendly', desc: 'Simple language, voice-first, guided experience' },
+  ]
 
   return (
     <div className="w-full min-h-screen bg-surface">
       {/* Top Navbar */}
-      <header className="w-full border-b border-border-light bg-surface-raised">
-        <nav className="flex items-center justify-between px-8 py-5 max-w-7xl mx-auto">
+      <header className="w-full border-b border-border-light bg-surface-raised sticky top-0 z-40 backdrop-blur-md">
+        <nav className="flex items-center justify-between px-4 sm:px-8 py-4 max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-md">
               <Heart className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-extrabold text-text-primary font-heading tracking-tight">
-              ArogyaDarpan
+            <span className="text-xl sm:text-2xl font-extrabold text-text-primary font-heading tracking-tight">
+              {t('appName', 'ArogyaDarpan')}
             </span>
           </div>
-          <button
-            onClick={() => navigate('/demo')}
-            className="text-sm font-semibold text-text-secondary hover:text-primary-600 transition-colors cursor-pointer px-4 py-2 rounded-lg hover:bg-primary-50"
-          >
-            Try Demo →
-          </button>
+
+          <div className="flex items-center gap-3">
+            <LanguageSelector variant="compact" />
+            <button
+              onClick={() => navigate('/demo')}
+              className="text-xs sm:text-sm font-semibold text-text-secondary hover:text-primary-600 transition-colors cursor-pointer px-3 py-1.5 rounded-lg hover:bg-primary-50"
+            >
+              {t('tryDemo', 'Try Demo')} →
+            </button>
+          </div>
         </nav>
       </header>
 
       {/* Hero Section */}
-      <section className="w-full max-w-5xl mx-auto px-6 pt-16 pb-20 text-center">
+      <section className="w-full max-w-5xl mx-auto px-6 pt-14 pb-18 text-center">
         <motion.div
           initial="hidden"
           animate="visible"
@@ -66,32 +73,26 @@ export default function LandingPage() {
           <motion.div
             custom={0}
             variants={fadeInUp}
-            className="inline-flex items-center gap-2 bg-primary-50 text-primary-700 px-4 py-2 rounded-full text-sm font-medium border border-primary-200 shadow-xs"
+            className="inline-flex items-center gap-2 bg-primary-50 text-primary-700 px-4 py-2 rounded-full text-xs sm:text-sm font-medium border border-primary-200 shadow-xs"
           >
             <Shield className="w-4 h-4 text-primary-600" />
-            AI prepares. AI explains. The doctor decides.
+            {t('aiPrepares', 'AI prepares. AI explains. The doctor decides.')}
           </motion.div>
 
           <motion.h1
             custom={1}
             variants={fadeInUp}
-            className="text-5xl md:text-6xl font-extrabold text-text-primary font-heading leading-[1.15] tracking-tight"
+            className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-text-primary font-heading leading-[1.18] tracking-tight"
           >
-            Your health story,
-            <br />
-            <span className="text-primary-500">
-              ready before the consultation.
-            </span>
+            {t('tagline', 'Your health story, ready before the consultation.')}
           </motion.h1>
 
           <motion.p
             custom={2}
             variants={fadeInUp}
-            className="text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed"
           >
-            A multilingual AI-powered platform that collects patient history,
-            understands previous medical records and prepares a structured
-            clinical summary for doctors.
+            {t('subtitle', 'A multilingual AI-powered platform that collects patient history, understands previous medical records and prepares a structured clinical summary for doctors.')}
           </motion.p>
 
           <motion.div
@@ -103,8 +104,9 @@ export default function LandingPage() {
               size="lg"
               onClick={() => navigate('/patient/language')}
               iconRight={ArrowRight}
+              className="shadow-lg shadow-primary-500/25"
             >
-              Start Patient Journey
+              {t('startPatient', 'Start Patient Journey')}
             </Button>
             <Button
               variant="outline"
@@ -112,7 +114,7 @@ export default function LandingPage() {
               onClick={() => navigate('/doctor')}
               icon={Stethoscope}
             >
-              Doctor Dashboard
+              {t('doctorDashboard', 'Doctor Dashboard')}
             </Button>
           </motion.div>
         </motion.div>
@@ -124,7 +126,7 @@ export default function LandingPage() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-50px' }}
-          className="bg-surface-raised rounded-3xl border border-border-light shadow-card p-8 md:p-12"
+          className="bg-surface-raised rounded-3xl border border-border-light shadow-card p-6 md:p-12"
         >
           <motion.h2
             custom={0}
@@ -181,7 +183,7 @@ export default function LandingPage() {
           ArogyaDarpan — Smart India Hackathon 2026
         </p>
         <p className="text-xs text-text-muted mt-1">
-          AI prepares. AI explains. The doctor decides.
+          {t('aiPrepares', 'AI prepares. AI explains. The doctor decides.')}
         </p>
       </footer>
     </div>

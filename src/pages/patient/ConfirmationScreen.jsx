@@ -1,16 +1,18 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ClipboardCheck, Check, Edit3, ArrowRight, AlertTriangle } from 'lucide-react'
+import { ClipboardCheck, Check, Edit3, ArrowRight, ArrowLeft, AlertTriangle } from 'lucide-react'
 import Button from '../../components/Button'
 import Card from '../../components/Card'
 import Badge from '../../components/Badge'
-import { getActivePatient, buildDynamicConfirmationItems, getActiveDocuments } from '../../services/sessionStore'
+import LanguageSelector from '../../components/LanguageSelector'
+import { getActivePatient, buildDynamicConfirmationItems } from '../../services/sessionStore'
+import { useLanguage } from '../../context/LanguageContext'
 
 export default function ConfirmationScreen() {
   const navigate = useNavigate()
+  const { t } = useLanguage()
   const patient = getActivePatient()
-  const documents = getActiveDocuments()
 
   // Dynamically build confirmation items from active interview responses & OCR
   const initialItems = useMemo(() => buildDynamicConfirmationItems(), [])
@@ -24,25 +26,36 @@ export default function ConfirmationScreen() {
     ))
   }
 
-  const hasAllergyConflict = items.some(item => item.label.includes('allergy') && item.status === 'needs_review')
+  const hasAllergyConflict = items.some(item => item.label.toLowerCase().includes('allergy') && item.status === 'needs_review')
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-surface via-surface to-primary-50/20 px-6 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-surface via-surface to-primary-50/20 px-4 sm:px-6 py-8 sm:py-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="max-w-2xl mx-auto space-y-6"
       >
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => navigate('/patient/document-review')}
+            className="flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-text-primary transition-colors px-2 py-1 rounded-lg hover:bg-surface-muted"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>{t('back', 'Back')}</span>
+          </button>
+          <LanguageSelector variant="compact" />
+        </div>
+
         <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-primary-500/20">
             <ClipboardCheck className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-text-primary font-heading mb-2">
-            Let's confirm what we understood
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary font-heading mb-2">
+            {t('letsConfirm', "Let's confirm what we understood")}
           </h1>
-          <p className="text-text-secondary">
-            Please review your intake information, <span className="font-bold text-text-primary">{patient.name || 'Patient'}</span>
+          <p className="text-xs sm:text-sm text-text-secondary">
+            {t('confirmSubtext', 'Please review your intake information before sending to the doctor')}, <span className="font-bold text-text-primary">{patient.name || 'Patient'}</span>
           </p>
         </div>
 
@@ -55,11 +68,11 @@ export default function ConfirmationScreen() {
                   <p className="text-xs text-text-muted uppercase tracking-wide font-bold mb-0.5">
                     {item.label}
                   </p>
-                  <p className="font-bold text-text-primary text-base">{item.value}</p>
+                  <p className="font-bold text-text-primary text-sm sm:text-base">{item.value}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {item.status === 'needs_review' && (
-                    <Badge severity="medium" dot>Needs confirmation</Badge>
+                    <Badge severity="medium" dot>{t('needsVerification', 'Needs confirmation')}</Badge>
                   )}
                   <button
                     onClick={() => toggleStatus(i)}
@@ -102,8 +115,9 @@ export default function ConfirmationScreen() {
           fullWidth
           onClick={() => navigate('/patient/complete')}
           iconRight={ArrowRight}
+          className="shadow-lg shadow-primary-500/25"
         >
-          Confirm Intake & Finish
+          {t('confirmFinish', 'Confirm & Send to Doctor')}
         </Button>
       </motion.div>
     </div>

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, ArrowLeft, Heart, MessageCircle, Volume2, Sun } from 'lucide-react'
+import { ArrowRight, ArrowLeft, Heart, MessageCircle, Volume2, VolumeX, Sun } from 'lucide-react'
 import Button from '../../components/Button'
 import Card from '../../components/Card'
 import VoiceRecorder from '../../components/VoiceRecorder'
@@ -9,13 +9,17 @@ import CompletenessTracker from '../../components/CompletenessTracker'
 import ClinicalSignalCard from '../../components/ClinicalSignalCard'
 import SymptomRadarCard from '../../components/SymptomRadarCard'
 import AYUSHModeToggle from '../../components/AYUSHModeToggle'
+import LanguageSelector from '../../components/LanguageSelector'
 import { useInterview } from '../../hooks/useInterview'
 import { useVoiceInput } from '../../hooks/useVoiceInput'
-import { COMPLAINT_OPTIONS } from '../../data/questionBank'
+import { useLanguage } from '../../context/LanguageContext'
+import { COMPLAINT_OPTIONS, getLocalizedQuestion, getLocalizedOption } from '../../data/questionBank'
 
 export default function InterviewScreen() {
   const navigate = useNavigate()
-  const lang = localStorage.getItem('arogya_language') || 'en'
+  const { lang, t, speechLocale, currentLanguageMeta } = useLanguage()
+  const [isSpeaking, setIsSpeaking] = useState(false)
+
   const {
     currentQuestion,
     currentIndex,
@@ -51,27 +55,45 @@ export default function InterviewScreen() {
     startListening,
     stopListening,
   } = useVoiceInput({
-    lang: lang === 'hi' ? 'hi-IN' : lang === 'pa' ? 'pa-IN' : 'en-IN',
+    lang: speechLocale,
     onResult: handleVoiceResult,
   })
 
-  // TTS Read Aloud with Multilingual Hindi & Punjabi Support
-  const handleReadAloud = () => {
-    if (!currentQuestion) return
-    const text = lang === 'hi' && currentQuestion.questionHi ? currentQuestion.questionHi : currentQuestion.question
-    const ttsLang = lang === 'hi' ? 'hi-IN' : lang === 'pa' ? 'pa-IN' : 'en-IN'
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel()
-      const utterance = new SpeechSynthesisUtterance(text)
-      utterance.rate = 0.9
-      utterance.lang = ttsLang
-      window.speechSynthesis.speak(utterance)
+  useEffect(() => {
+    return () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel()
+      }
     }
+  }, [])
+
+  // Dynamic Multi-Language Speech Synthesis (TTS)
+  const handleReadAloud = () => {
+    if (!currentQuestion || !('speechSynthesis' in window)) return
+
+    if (isSpeaking) {
+      window.speechSynthesis.cancel()
+      setIsSpeaking(false)
+      return
+    }
+
+    const questionToSpeak = getLocalizedQuestion(currentQuestion, lang)
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(questionToSpeak)
+    utterance.rate = 0.92
+    utterance.lang = speechLocale
+
+    utterance.onend = () => setIsSpeaking(false)
+    utterance.onerror = () => setIsSpeaking(false)
+
+    setIsSpeaking(true)
+    window.speechSynthesis.speak(utterance)
   }
 
-  // Safe navigation on completion inside useEffect
+  // Safe navigation on completion
   useEffect(() => {
     if (isComplete) {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel()
       localStorage.setItem('arogya_responses', JSON.stringify(responses))
       localStorage.setItem('arogya_triage', JSON.stringify(triageData))
       navigate('/patient/documents')
@@ -92,7 +114,7 @@ export default function InterviewScreen() {
       setTextInput('')
       setNumberInput('')
       setSelectedOptions([])
-      setTimeout(nextQuestion, 300)
+      setTimeout(nextQuestion, 250)
     }
   }
 
@@ -112,12 +134,10 @@ export default function InterviewScreen() {
   const handleComplaintSelect = (complaintId) => {
     submitResponse('chief_complaint', '', complaintId, 'touch')
     setTextInput('')
-    setTimeout(nextQuestion, 300)
+    setTimeout(nextQuestion, 250)
   }
 
-  const questionText = lang === 'hi' && currentQuestion.questionHi
-    ? currentQuestion.questionHi
-    : currentQuestion.question
+  const questionText = getLocalizedQuestion(currentQuestion, lang)
 
   return (
     <div className={`min-h-screen bg-surface flex ${isLowLiteracy ? 'text-lg' : ''}`}>
@@ -129,7 +149,7 @@ export default function InterviewScreen() {
               <Heart className="w-5 h-5 text-white" />
             </div>
             <span className="font-extrabold text-text-primary text-xl font-heading tracking-tight">
-              ArogyaDarpan
+              {t('appName', 'ArogyaDarpan')}
             </span>
           </div>
 
@@ -142,6 +162,12 @@ export default function InterviewScreen() {
             <Sun className="w-3.5 h-3.5" />
             {isLowLiteracy ? 'Simple Mode ON' : 'Simple Mode'}
           </button>
+        </div>
+
+        {/* Universal Language Switcher */}
+        <div className="bg-surface-muted/60 p-3 rounded-2xl border border-border-light flex items-center justify-between">
+          <span className="text-xs font-semibold text-text-secondary">{t('switchLanguage', 'Language')}</span>
+          <LanguageSelector variant="compact" />
         </div>
 
         {/* AYUSH & Modern Mode Selector */}
@@ -178,26 +204,33 @@ export default function InterviewScreen() {
       </aside>
 
       {/* Main Interview Area */}
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col min-w-0">
         {/* Top Header */}
-        <header className="flex items-center justify-between px-8 py-4 border-b border-border-light bg-surface-raised">
+        <header className="flex items-center justify-between px-4 sm:px-8 py-3.5 border-b border-border-light bg-surface-raised">
           <div className="flex items-center gap-3">
-            <h2 className="font-bold text-text-primary text-lg font-heading">
-              Clinical Intake Interview
+            <h2 className="font-bold text-text-primary text-base sm:text-lg font-heading">
+              {t('healthInterview', 'Clinical Intake Interview')}
             </h2>
-            <span className="bg-primary-50 text-primary-700 text-xs px-2.5 py-1 rounded-full font-semibold border border-primary-200">
+            <span className="hidden sm:inline-block bg-primary-50 text-primary-700 text-xs px-2.5 py-1 rounded-full font-semibold border border-primary-200">
               {mode === 'ayush' ? '🌿 AYUSH Track' : '🩺 Modern Track'}
             </span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" icon={Volume2} onClick={handleReadAloud}>
-              Listen
+          <div className="flex items-center gap-2 sm:gap-4">
+            <LanguageSelector variant="compact" className="lg:hidden" />
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={isSpeaking ? VolumeX : Volume2}
+              onClick={handleReadAloud}
+              className={isSpeaking ? 'text-primary-600 bg-primary-50' : ''}
+            >
+              <span className="hidden sm:inline">{isSpeaking ? t('stopAudio', 'Stop') : t('readAloud', 'Listen')}</span>
             </Button>
-            <span className="text-sm font-semibold text-text-muted">
+            <span className="text-xs sm:text-sm font-semibold text-text-muted whitespace-nowrap">
               {currentIndex + 1} / {totalQuestions}
             </span>
-            <div className="w-36 h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="w-20 sm:w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-primary-500 rounded-full transition-all duration-500"
                 style={{ width: `${((currentIndex + 1) / totalQuestions) * 100}%` }}
@@ -207,30 +240,34 @@ export default function InterviewScreen() {
         </header>
 
         {/* Question & Interactive Response Area */}
-        <div className="flex-1 flex items-center justify-center px-8 py-10">
+        <div className="flex-1 flex items-center justify-center px-4 sm:px-8 py-8 overflow-y-auto">
           <div className="max-w-2xl w-full">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentQuestion.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.25 }}
               >
                 {/* AI Assistant Banner */}
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600">
+                    <div className="w-7 h-7 rounded-full bg-primary-100 flex items-center justify-center text-primary-600">
                       <MessageCircle className="w-4 h-4" />
                     </div>
-                    <span className="text-sm font-bold text-primary-700 font-heading">ArogyaDarpan Intake AI</span>
+                    <span className="text-xs sm:text-sm font-bold text-primary-700 font-heading">
+                      ArogyaDarpan Voice AI
+                    </span>
                   </div>
 
-                  <span className="text-xs text-text-muted">Speak in English, Hindi or Punjabi</span>
+                  <span className="text-xs text-text-muted bg-surface-muted px-2.5 py-1 rounded-full border border-border-light">
+                    🎙️ {currentLanguageMeta.flag} {currentLanguageMeta.native}
+                  </span>
                 </div>
 
                 {/* Main Question Heading */}
-                <h2 className={`font-bold text-text-primary font-heading mb-8 leading-snug ${isLowLiteracy ? 'text-3xl' : 'text-2xl md:text-3xl'}`}>
+                <h2 className={`font-bold text-text-primary font-heading mb-6 leading-snug ${isLowLiteracy ? 'text-2xl sm:text-3xl' : 'text-xl sm:text-2xl md:text-3xl'}`}>
                   {questionText}
                 </h2>
 
@@ -243,28 +280,33 @@ export default function InterviewScreen() {
                   onStart={startListening}
                   onStop={stopListening}
                   error={error}
-                  className="mb-8"
+                  className="mb-6"
                 />
 
                 {/* Answer Options based on Type */}
                 {currentQuestion.type === 'complaint_select' && (
                   <div className="space-y-3">
-                    <p className="text-sm font-medium text-text-muted mb-3">Speak or select your primary complaint</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {COMPLAINT_OPTIONS.map(opt => (
-                        <Card
-                          key={opt.id}
-                          hover
-                          onClick={() => handleComplaintSelect(opt.id)}
-                          padding="px-4 py-4"
-                          className="flex flex-col items-center text-center gap-2"
-                        >
-                          <span className="text-3xl">{opt.icon}</span>
-                          <span className="font-bold text-text-primary text-sm font-heading">
-                            {lang === 'hi' ? opt.labelHi : opt.label}
-                          </span>
-                        </Card>
-                      ))}
+                    <p className="text-xs sm:text-sm font-medium text-text-muted mb-3">
+                      {t('speakOrChoose', 'Speak or select your primary complaint')}
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+                      {COMPLAINT_OPTIONS.map(opt => {
+                        const optLabel = opt.labels && opt.labels[lang] ? opt.labels[lang] : opt.label
+                        return (
+                          <Card
+                            key={opt.id}
+                            hover
+                            onClick={() => handleComplaintSelect(opt.id)}
+                            padding="px-3 py-3.5"
+                            className="flex flex-col items-center text-center gap-1.5 cursor-pointer hover:border-primary-400 hover:shadow-md transition-all"
+                          >
+                            <span className="text-2xl sm:text-3xl">{opt.icon}</span>
+                            <span className="font-bold text-text-primary text-xs sm:text-sm font-heading line-clamp-2">
+                              {optLabel}
+                            </span>
+                          </Card>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
@@ -275,66 +317,75 @@ export default function InterviewScreen() {
                       variant="outline"
                       size={isLowLiteracy ? 'xl' : 'lg'}
                       onClick={() => handleSelectOption('yes')}
-                      className="min-w-[140px]"
+                      className="min-w-[130px] border-2 hover:border-primary-500"
                     >
-                      {lang === 'hi' ? 'हाँ (Yes)' : 'Yes'}
+                      {t('yes', 'Yes')}
                     </Button>
                     <Button
                       variant="secondary"
                       size={isLowLiteracy ? 'xl' : 'lg'}
                       onClick={() => handleSelectOption('no')}
-                      className="min-w-[140px]"
+                      className="min-w-[130px]"
                     >
-                      {lang === 'hi' ? 'नहीं (No)' : 'No'}
+                      {t('no', 'No')}
                     </Button>
                   </div>
                 )}
 
                 {currentQuestion.type === 'single_select' && currentQuestion.options && (
                   <div className="space-y-2.5">
-                    {currentQuestion.options.map(opt => (
-                      <Card
-                        key={opt.value}
-                        hover
-                        onClick={() => handleSelectOption(opt.value)}
-                        padding="px-5 py-4"
-                      >
-                        <span className="font-bold text-text-primary text-base">
-                          {lang === 'hi' && opt.labelHi ? opt.labelHi : opt.label}
-                        </span>
-                      </Card>
-                    ))}
+                    {currentQuestion.options.map(opt => {
+                      const optLabel = getLocalizedOption(opt, lang)
+                      return (
+                        <Card
+                          key={opt.value}
+                          hover
+                          onClick={() => handleSelectOption(opt.value)}
+                          padding="px-5 py-3.5"
+                          className="cursor-pointer hover:border-primary-400 transition-all"
+                        >
+                          <span className="font-semibold text-text-primary text-sm sm:text-base">
+                            {optLabel}
+                          </span>
+                        </Card>
+                      )
+                    })}
                   </div>
                 )}
 
                 {currentQuestion.type === 'multi_select' && currentQuestion.options && (
                   <div className="space-y-2.5">
-                    {currentQuestion.options.map(opt => (
-                      <Card
-                        key={opt.value}
-                        hover
-                        selected={selectedOptions.includes(opt.value)}
-                        onClick={() => handleSelectOption(opt.value)}
-                        padding="px-5 py-4"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-                            selectedOptions.includes(opt.value)
-                              ? 'bg-primary-500 border-primary-500'
-                              : 'border-gray-300'
-                          }`}>
-                            {selectedOptions.includes(opt.value) && (
-                              <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                              </svg>
-                            )}
+                    {currentQuestion.options.map(opt => {
+                      const optLabel = getLocalizedOption(opt, lang)
+                      const isSelected = selectedOptions.includes(opt.value)
+                      return (
+                        <Card
+                          key={opt.value}
+                          hover
+                          selected={isSelected}
+                          onClick={() => handleSelectOption(opt.value)}
+                          padding="px-5 py-3.5"
+                          className="cursor-pointer"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                              isSelected
+                                ? 'bg-primary-500 border-primary-500'
+                                : 'border-gray-300'
+                            }`}>
+                              {isSelected && (
+                                <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </div>
+                            <span className="font-semibold text-text-primary text-sm sm:text-base">
+                              {optLabel}
+                            </span>
                           </div>
-                          <span className="font-bold text-text-primary text-base">
-                            {lang === 'hi' && opt.labelHi ? opt.labelHi : opt.label}
-                          </span>
-                        </div>
-                      </Card>
-                    ))}
+                        </Card>
+                      )
+                    })}
                     <Button
                       size="lg"
                       fullWidth
@@ -342,7 +393,7 @@ export default function InterviewScreen() {
                       disabled={selectedOptions.length === 0}
                       onClick={handleSubmitCurrent}
                     >
-                      Continue
+                      {t('continue', 'Continue')}
                     </Button>
                   </div>
                 )}
@@ -354,17 +405,17 @@ export default function InterviewScreen() {
                       onChange={(e) => setTextInput(e.target.value)}
                       placeholder={currentQuestion.placeholder || 'Describe your symptoms or voice answers above...'}
                       rows={3}
-                      className="w-full px-4 py-3.5 rounded-2xl border border-border-light bg-surface-raised text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none font-medium"
+                      className="w-full px-4 py-3.5 rounded-2xl border border-border-light bg-surface-raised text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none text-sm sm:text-base"
                     />
                     <Button
                       size="lg"
                       fullWidth
-                      className="mt-4"
+                      className="mt-3"
                       disabled={!textInput.trim()}
                       onClick={handleSubmitCurrent}
                       iconRight={ArrowRight}
                     >
-                      Continue
+                      {t('continue', 'Continue')}
                     </Button>
                   </div>
                 )}
@@ -377,9 +428,9 @@ export default function InterviewScreen() {
                       max={currentQuestion.max || 10}
                       value={numberInput || 5}
                       onChange={(e) => setNumberInput(e.target.value)}
-                      className="w-full max-w-xs mb-4 accent-primary-500"
+                      className="w-full max-w-xs mb-4 accent-primary-500 cursor-pointer"
                     />
-                    <span className="text-4xl font-extrabold text-primary-600 font-heading mb-6">
+                    <span className="text-4xl font-extrabold text-primary-600 font-heading mb-5">
                       {numberInput || 5} / {currentQuestion.max || 10}
                     </span>
                     <Button
@@ -391,7 +442,7 @@ export default function InterviewScreen() {
                       }}
                       iconRight={ArrowRight}
                     >
-                      Continue
+                      {t('continue', 'Continue')}
                     </Button>
                   </div>
                 )}
@@ -401,14 +452,14 @@ export default function InterviewScreen() {
         </div>
 
         {/* Footer Navigation */}
-        <footer className="flex items-center justify-between px-8 py-4 border-t border-border-light bg-surface-raised">
+        <footer className="flex items-center justify-between px-4 sm:px-8 py-3.5 border-t border-border-light bg-surface-raised">
           <Button
             variant="ghost"
             icon={ArrowLeft}
             onClick={previousQuestion}
             disabled={currentIndex === 0}
           >
-            Back
+            {t('previous', 'Back')}
           </Button>
           <Button
             variant="ghost"
@@ -417,7 +468,7 @@ export default function InterviewScreen() {
               nextQuestion()
             }}
           >
-            Skip Question
+            {t('skip', 'Skip Question')}
           </Button>
         </footer>
       </main>
