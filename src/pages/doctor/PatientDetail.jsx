@@ -5,7 +5,8 @@ import {
   ArrowLeft, Heart, User, Calendar, Phone, FileText,
   ClipboardList, Clock, Pill, FlaskConical, AlertTriangle,
   Users, Cigarette, Wine, Download, ExternalLink, Check, X,
-  Activity, Eye, Sparkles, Code, Leaf, Shield, Brain
+  Activity, Eye, Sparkles, Code, Leaf, Shield, Brain,
+  Edit3, Stethoscope, Plus
 } from 'lucide-react'
 import Button from '../../components/Button'
 import Card from '../../components/Card'
@@ -44,6 +45,28 @@ export default function PatientDetail() {
 
   const patient = getDemoPatient(id) || getDemoPatient('demo-001')
   const { summary, clinicalSignals, timeline, documents, interviewResponses = [] } = patient
+
+  // Editable Summary State for Doctor Corrections
+  const [summaryData, setSummaryData] = useState(summary)
+  const [editModal, setEditModal] = useState({
+    isOpen: false,
+    sectionKey: '',
+    title: '',
+    textValue: ''
+  })
+
+  // Physician Clinical Notes & Orders State
+  const [physicianOrders, setPhysicianOrders] = useState({
+    diagnosis: '',
+    clinicalNotes: '',
+    medications: [
+      { name: 'Tab Aspirin 75 mg', instructions: 'Once daily after breakfast', duration: '30 days' },
+      { name: 'Tab Atorvastatin 20 mg', instructions: 'Once daily at bedtime', duration: '30 days' },
+    ],
+    labOrders: ['12-Lead ECG (STAT)', 'Serum Troponin-I', 'Lipid Profile', 'HbA1c'],
+    isSigned: false,
+    signedAt: null,
+  })
   
   // Dynamic HL7 FHIR Bundle generated from active patient object
   const fhirBundle = useMemo(() => prepareFHIRBundle(patient), [patient])
@@ -56,6 +79,89 @@ export default function PatientDetail() {
   }
   const handleReject = (section) => {
     setSectionStatuses(prev => ({ ...prev, [section]: 'rejected' }))
+  }
+
+  const handleOpenEdit = (sectionKey, title, currentVal) => {
+    let initialText = ''
+    if (typeof currentVal === 'string') {
+      initialText = currentVal
+    } else if (Array.isArray(currentVal)) {
+      initialText = currentVal.map(item => typeof item === 'object' ? (item.name || item.condition || JSON.stringify(item)) : String(item)).join('\n')
+    } else if (currentVal && typeof currentVal === 'object') {
+      initialText = JSON.stringify(currentVal, null, 2)
+    }
+    setEditModal({
+      isOpen: true,
+      sectionKey,
+      title,
+      textValue: initialText
+    })
+  }
+
+  const handleSaveCorrection = () => {
+    const { sectionKey, textValue } = editModal
+    setSummaryData(prev => ({
+      ...prev,
+      [sectionKey]: textValue
+    }))
+    setSectionStatuses(prev => ({
+      ...prev,
+      [sectionKey]: 'doctor_corrected'
+    }))
+    setEditModal({ isOpen: false, sectionKey: '', title: '', textValue: '' })
+  }
+
+  const handleUpdateMed = (index, field, val) => {
+    setPhysicianOrders(prev => {
+      const updated = [...prev.medications]
+      updated[index] = { ...updated[index], [field]: val }
+      return { ...prev, medications: updated }
+    })
+  }
+
+  const handleAddPrescriptionItem = () => {
+    setPhysicianOrders(prev => ({
+      ...prev,
+      medications: [
+        ...prev.medications,
+        { name: 'New Medicine', instructions: 'Once daily', duration: '14 days' }
+      ]
+    }))
+  }
+
+  const handleRemoveMed = (index) => {
+    setPhysicianOrders(prev => ({
+      ...prev,
+      medications: prev.medications.filter((_, i) => i !== index)
+    }))
+  }
+
+  const handleAddLab = (e) => {
+    if (e.key === 'Enter' && e.target.value.trim()) {
+      e.preventDefault()
+      const newTest = e.target.value.trim()
+      setPhysicianOrders(prev => ({
+        ...prev,
+        labOrders: [...prev.labOrders, newTest]
+      }))
+      e.target.value = ''
+    }
+  }
+
+  const handleRemoveLab = (index) => {
+    setPhysicianOrders(prev => ({
+      ...prev,
+      labOrders: prev.labOrders.filter((_, i) => i !== index)
+    }))
+  }
+
+  const handleSignConsultation = () => {
+    const now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+    setPhysicianOrders(prev => ({
+      ...prev,
+      isSigned: true,
+      signedAt: now
+    }))
   }
 
   const openEvidence = (title, snippet, documentName, type = 'document') => {
@@ -276,12 +382,13 @@ export default function PatientDetail() {
                   {/* 1. Chief Complaint */}
                   <SummarySection
                     title="1. Chief Complaint"
-                    content={summary.chiefComplaint}
+                    content={summaryData.chiefComplaint}
                     source="Patient ASR / Touch Intake"
                     status={sectionStatuses.chiefComplaint}
                     onConfirm={() => handleVerify('chiefComplaint')}
+                    onEdit={() => handleOpenEdit('chiefComplaint', 'Chief Complaint', summaryData.chiefComplaint)}
                     onReject={() => handleReject('chiefComplaint')}
-                    onViewSource={() => openEvidence('Chief Complaint', summary.chiefComplaint, 'Patient Voice Transcript', 'voice')}
+                    onViewSource={() => openEvidence('Chief Complaint', summaryData.chiefComplaint, 'Patient Voice Transcript', 'voice')}
                   />
 
                   {/* 2. HPI — SOCRATES Framework Breakdown */}
@@ -291,10 +398,15 @@ export default function PatientDetail() {
                         <Sparkles className="w-4 h-4 text-primary-500" />
                         2. History of Present Illness (SOCRATES Framework)
                       </h3>
-                      <VerificationButtons status={sectionStatuses.hpi} onConfirm={() => handleVerify('hpi')} onReject={() => handleReject('hpi')} />
+                      <VerificationButtons
+                        status={sectionStatuses.hpi}
+                        onConfirm={() => handleVerify('hpi')}
+                        onEdit={() => handleOpenEdit('hpi', 'History of Present Illness (HPI)', summaryData.hpi)}
+                        onReject={() => handleReject('hpi')}
+                      />
                     </div>
 
-                    <p className="text-sm text-text-secondary mb-4 leading-relaxed">{summary.hpi}</p>
+                    <p className="text-sm text-text-secondary mb-4 leading-relaxed">{summaryData.hpi}</p>
 
                     {/* SOCRATES Grid */}
                     <div className="grid grid-cols-2 gap-2 text-xs bg-surface-muted p-3.5 rounded-xl border border-border-light">
@@ -313,16 +425,25 @@ export default function PatientDetail() {
                   <Card>
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-bold text-text-primary font-heading text-base">3. Past Medical & Surgical History</h3>
-                      <VerificationButtons status={sectionStatuses.pastHistory} onConfirm={() => handleVerify('pastHistory')} onReject={() => handleReject('pastHistory')} />
+                      <VerificationButtons
+                        status={sectionStatuses.pastHistory}
+                        onConfirm={() => handleVerify('pastHistory')}
+                        onEdit={() => handleOpenEdit('pastHistory', 'Past Medical & Surgical History', summaryData.pastHistory)}
+                        onReject={() => handleReject('pastHistory')}
+                      />
                     </div>
-                    {summary.pastHistory?.map((item, i) => (
-                      <div key={i} className="flex items-center justify-between bg-surface-muted rounded-xl px-4 py-2.5 mb-2 text-sm">
-                        <span className="font-bold text-text-primary">{item.condition} (Since {item.since})</span>
-                        <button onClick={() => openEvidence(item.condition, `${item.condition} documented at District Hospital`, 'Discharge_Summary_2024.pdf', 'document')} className="text-xs text-primary-600 font-semibold hover:underline flex items-center gap-1 cursor-pointer">
-                          <Eye className="w-3.5 h-3.5" /> Source Document
-                        </button>
-                      </div>
-                    ))}
+                    {Array.isArray(summaryData.pastHistory) ? (
+                      summaryData.pastHistory.map((item, i) => (
+                        <div key={i} className="flex items-center justify-between bg-surface-muted rounded-xl px-4 py-2.5 mb-2 text-sm">
+                          <span className="font-bold text-text-primary">{item.condition} (Since {item.since})</span>
+                          <button onClick={() => openEvidence(item.condition, `${item.condition} documented at District Hospital`, 'Discharge_Summary_2024.pdf', 'document')} className="text-xs text-primary-600 font-semibold hover:underline flex items-center gap-1 cursor-pointer">
+                            <Eye className="w-3.5 h-3.5" /> Source Document
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-text-secondary">{String(summaryData.pastHistory)}</p>
+                    )}
                   </Card>
 
                   {/* 4. Drug & Allergy History */}
@@ -331,27 +452,36 @@ export default function PatientDetail() {
                       <h3 className="font-bold text-text-primary font-heading text-base flex items-center gap-2">
                         <Pill className="w-4 h-4 text-primary-500" /> 4. Drug & Allergy History
                       </h3>
-                      <VerificationButtons status={sectionStatuses.medications} onConfirm={() => handleVerify('medications')} onReject={() => handleReject('medications')} />
+                      <VerificationButtons
+                        status={sectionStatuses.medications}
+                        onConfirm={() => handleVerify('medications')}
+                        onEdit={() => handleOpenEdit('medications', 'Drug & Allergy History', summaryData.medications)}
+                        onReject={() => handleReject('medications')}
+                      />
                     </div>
 
                     <div className="space-y-2 mb-3">
-                      {summary.medications?.map((med, i) => (
-                        <div key={i} className="flex items-center justify-between bg-surface-muted rounded-xl px-4 py-2.5 text-sm">
-                          <div>
-                            <span className="font-bold text-text-primary">{med.name}</span>
-                            <span className="text-xs text-text-muted ml-2">{med.frequency}</span>
+                      {Array.isArray(summaryData.medications) ? (
+                        summaryData.medications.map((med, i) => (
+                          <div key={i} className="flex items-center justify-between bg-surface-muted rounded-xl px-4 py-2.5 text-sm">
+                            <div>
+                              <span className="font-bold text-text-primary">{med.name}</span>
+                              <span className="text-xs text-text-muted ml-2">{med.frequency}</span>
+                            </div>
+                            <ConfidenceBadge score={med.confidence || 0.96} />
                           </div>
-                          <ConfidenceBadge score={med.confidence || 0.96} />
-                        </div>
-                      ))}
+                        ))
+                      ) : (
+                        <p className="text-sm text-text-secondary">{String(summaryData.medications)}</p>
+                      )}
                     </div>
 
-                    {summary.allergies?.status === 'conflict' && (
+                    {summaryData.allergies?.status === 'conflict' && (
                       <ClinicalSignalCard
                         severity="high"
                         message="Allergy Information Conflict"
-                        currentValue={summary.allergies.currentResponse}
-                        previousValue={summary.allergies.historicalRecord}
+                        currentValue={summaryData.allergies.currentResponse}
+                        previousValue={summaryData.allergies.historicalRecord}
                       />
                     )}
                   </Card>
@@ -359,45 +489,70 @@ export default function PatientDetail() {
                   {/* 5. Family History */}
                   <SummarySection
                     title="5. Family History"
-                    content={summary.familyHistory || 'Father had coronary artery disease at age 52'}
+                    content={summaryData.familyHistory || 'Father had coronary artery disease at age 52'}
                     status={sectionStatuses.familyHistory}
                     onConfirm={() => handleVerify('familyHistory')}
+                    onEdit={() => handleOpenEdit('familyHistory', 'Family History', summaryData.familyHistory || 'Father had coronary artery disease at age 52')}
                     onReject={() => handleReject('familyHistory')}
                   />
 
                   {/* 6. Personal & Lifestyle History (Ahara-Vihara) */}
                   <Card>
-                    <h3 className="font-bold text-text-primary font-heading text-base mb-3">6. Personal & Lifestyle History (Ahara-Vihara)</h3>
-                    <div className="grid grid-cols-2 gap-3 text-xs bg-surface-muted p-3.5 rounded-xl">
-                      <div><span className="font-bold text-text-primary">Smoking:</span> Quit 2 years ago (Ex-smoker)</div>
-                      <div><span className="font-bold text-text-primary">Alcohol:</span> Occasional social use</div>
-                      <div><span className="font-bold text-text-primary">Ahara (Diet):</span> Mixed diet, irregular meal timings</div>
-                      <div><span className="font-bold text-text-primary">Vihara (Lifestyle):</span> Moderate physical activity, desk work</div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-bold text-text-primary font-heading text-base">6. Personal & Lifestyle History (Ahara-Vihara)</h3>
+                      <VerificationButtons
+                        status={sectionStatuses.personalHistory}
+                        onConfirm={() => handleVerify('personalHistory')}
+                        onEdit={() => handleOpenEdit('personalHistory', 'Personal & Lifestyle History', summaryData.personalHistory || 'Smoking: Quit 2 years ago (Ex-smoker), Alcohol: Occasional, Diet: Mixed, Physical Activity: Moderate')}
+                        onReject={() => handleReject('personalHistory')}
+                      />
                     </div>
+                    {typeof summaryData.personalHistory === 'string' ? (
+                      <p className="text-sm text-text-secondary leading-relaxed">{summaryData.personalHistory}</p>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-3 text-xs bg-surface-muted p-3.5 rounded-xl">
+                        <div><span className="font-bold text-text-primary">Smoking:</span> Quit 2 years ago (Ex-smoker)</div>
+                        <div><span className="font-bold text-text-primary">Alcohol:</span> Occasional social use</div>
+                        <div><span className="font-bold text-text-primary">Ahara (Diet):</span> Mixed diet, irregular meal timings</div>
+                        <div><span className="font-bold text-text-primary">Vihara (Lifestyle):</span> Moderate physical activity, desk work</div>
+                      </div>
+                    )}
                   </Card>
 
                   {/* 7. Review of Systems (ROS) */}
                   <Card>
-                    <h3 className="font-bold text-text-primary font-heading text-base mb-3">7. Review of Systems (ROS)</h3>
-                    <div className="space-y-2 text-xs">
-                      <div className="bg-surface-muted p-2.5 rounded-lg flex justify-between">
-                        <span className="font-bold text-text-primary">Cardiovascular:</span>
-                        <span className="text-text-secondary">Chest pain, exertional dyspnea, diaphoresis</span>
-                      </div>
-                      <div className="bg-surface-muted p-2.5 rounded-lg flex justify-between">
-                        <span className="font-bold text-text-primary">Respiratory:</span>
-                        <span className="text-text-secondary">Shortness of breath on exertion; no chronic cough</span>
-                      </div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-bold text-text-primary font-heading text-base">7. Review of Systems (ROS)</h3>
+                      <VerificationButtons
+                        status={sectionStatuses.ros}
+                        onConfirm={() => handleVerify('ros')}
+                        onEdit={() => handleOpenEdit('ros', 'Review of Systems (ROS)', summaryData.ros || 'Cardiovascular: Chest pain, exertional dyspnea, diaphoresis. Respiratory: Shortness of breath on exertion.')}
+                        onReject={() => handleReject('ros')}
+                      />
                     </div>
+                    {typeof summaryData.ros === 'string' ? (
+                      <p className="text-sm text-text-secondary leading-relaxed">{summaryData.ros}</p>
+                    ) : (
+                      <div className="space-y-2 text-xs">
+                        <div className="bg-surface-muted p-2.5 rounded-lg flex justify-between">
+                          <span className="font-bold text-text-primary">Cardiovascular:</span>
+                          <span className="text-text-secondary">Chest pain, exertional dyspnea, diaphoresis</span>
+                        </div>
+                        <div className="bg-surface-muted p-2.5 rounded-lg flex justify-between">
+                          <span className="font-bold text-text-primary">Respiratory:</span>
+                          <span className="text-text-secondary">Shortness of breath on exertion; no chronic cough</span>
+                        </div>
+                      </div>
+                    )}
                   </Card>
 
                   {/* 8. Prior Investigations Summary */}
-                  {summary.investigations?.length > 0 && (
+                  {summaryData.investigations?.length > 0 && (
                     <Card>
                       <h3 className="font-bold text-text-primary font-heading text-base flex items-center gap-2 mb-3">
                         <FlaskConical className="w-4 h-4 text-purple-500" /> 8. Prior Investigations Summary
                       </h3>
-                      {summary.investigations.map((inv, i) => (
+                      {summaryData.investigations.map((inv, i) => (
                         <div key={i} className="flex items-center justify-between bg-surface-muted rounded-xl px-4 py-2.5 mb-2 text-sm">
                           <div>
                             <span className="font-bold text-text-primary">{inv.name}: {inv.value}</span>
@@ -410,6 +565,152 @@ export default function PatientDetail() {
                       ))}
                     </Card>
                   )}
+
+                  {/* 9. Physician Clinical Notes, Orders & Rx Plan */}
+                  <Card className="border-2 border-primary-300 shadow-md bg-gradient-to-br from-surface to-primary-50/20">
+                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-border-light">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white">
+                          <Stethoscope className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-text-primary font-heading text-base">
+                            Physician Clinical Notes, Orders & Prescription Plan
+                          </h3>
+                          <p className="text-xs text-text-muted">ABDM Practitioner Direct EHR Entry</p>
+                        </div>
+                      </div>
+                      {physicianOrders.isSigned ? (
+                        <Badge severity="success" size="md">
+                          ✓ Signed at {physicianOrders.signedAt}
+                        </Badge>
+                      ) : (
+                        <Badge severity="neutral" size="sm">
+                          Draft (Unsigned)
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Final Clinical Diagnosis */}
+                      <div>
+                        <label className="text-xs font-bold text-text-secondary block mb-1">
+                          Final Confirmed Diagnosis / Clinical Impression
+                        </label>
+                        <input
+                          type="text"
+                          value={physicianOrders.diagnosis}
+                          onChange={(e) => setPhysicianOrders(prev => ({ ...prev, diagnosis: e.target.value }))}
+                          placeholder={acceptedICD ? `ICD ${acceptedICD.icdCode} — ${acceptedICD.disease}` : "e.g. Unstable Angina (ICD-10 I20.0) / Acute Coronary Syndrome"}
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-border-light bg-surface-raised text-sm font-medium text-text-primary focus:ring-2 focus:ring-primary-500"
+                        />
+                      </div>
+
+                      {/* Rx Medications */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs font-bold text-text-secondary flex items-center gap-1.5">
+                            <Pill className="w-3.5 h-3.5 text-primary-600" /> Prescribed Medications (Rx)
+                          </label>
+                          <button
+                            type="button"
+                            onClick={handleAddPrescriptionItem}
+                            className="text-xs text-primary-600 font-semibold hover:underline cursor-pointer flex items-center gap-1"
+                          >
+                            <Plus className="w-3 h-3" /> Add Drug
+                          </button>
+                        </div>
+                        <div className="space-y-2">
+                          {physicianOrders.medications.map((med, idx) => (
+                            <div key={idx} className="flex items-center gap-2 bg-surface-raised p-2.5 rounded-xl border border-border-light text-xs">
+                              <input
+                                type="text"
+                                value={med.name}
+                                onChange={(e) => handleUpdateMed(idx, 'name', e.target.value)}
+                                placeholder="Drug Name & Strength"
+                                className="flex-1 font-bold text-text-primary bg-transparent focus:outline-none"
+                              />
+                              <input
+                                type="text"
+                                value={med.instructions}
+                                onChange={(e) => handleUpdateMed(idx, 'instructions', e.target.value)}
+                                placeholder="Dosage & Timing"
+                                className="flex-1 text-text-secondary bg-transparent focus:outline-none"
+                              />
+                              <input
+                                type="text"
+                                value={med.duration}
+                                onChange={(e) => handleUpdateMed(idx, 'duration', e.target.value)}
+                                placeholder="Duration"
+                                className="w-24 text-text-muted bg-transparent focus:outline-none text-right"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveMed(idx)}
+                                className="text-text-muted hover:text-red-500 cursor-pointer p-1"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Diagnostic & Lab Orders */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs font-bold text-text-secondary flex items-center gap-1.5">
+                            <FlaskConical className="w-3.5 h-3.5 text-purple-600" /> Diagnostic & Lab Requisitions
+                          </label>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          {physicianOrders.labOrders.map((lab, idx) => (
+                            <span key={idx} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-purple-50 text-purple-800 border border-purple-200 text-xs font-semibold">
+                              {lab}
+                              <button type="button" onClick={() => handleRemoveLab(idx)} className="cursor-pointer hover:text-red-600">
+                                <X className="w-3 h-3" />
+                              </button>
+                            </span>
+                          ))}
+                          <input
+                            type="text"
+                            onKeyDown={handleAddLab}
+                            placeholder="+ Type order and press Enter"
+                            className="text-xs px-3 py-1 rounded-lg border border-dashed border-border-light bg-surface-raised focus:outline-none focus:ring-1 focus:ring-primary-500 w-56"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Clinical Notes & Follow-up */}
+                      <div>
+                        <label className="text-xs font-bold text-text-secondary block mb-1">
+                          Physician Notes & Clinical Advice
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={physicianOrders.clinicalNotes}
+                          onChange={(e) => setPhysicianOrders(prev => ({ ...prev, clinicalNotes: e.target.value }))}
+                          placeholder="Admission in cardiac day care advised; urgent coronary angiography scheduled; lifestyle moderation..."
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-border-light bg-surface-raised text-sm text-text-primary focus:ring-2 focus:ring-primary-500"
+                        />
+                      </div>
+
+                      {/* Sign and Finalize Button */}
+                      <div className="flex items-center justify-between pt-3 border-t border-border-light">
+                        <span className="text-xs text-text-muted">
+                          Directly links to ABDM Health Information Exchange (HIE-CM).
+                        </span>
+                        <Button
+                          variant={physicianOrders.isSigned ? 'success' : 'primary'}
+                          size="md"
+                          icon={Check}
+                          onClick={handleSignConsultation}
+                        >
+                          {physicianOrders.isSigned ? '✓ Signed & Finalized' : 'Sign & Complete Consultation'}
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
                 </div>
               )}
 
@@ -578,16 +879,73 @@ export default function PatientDetail() {
           </div>
         </div>
       )}
+
+      {/* Doctor Edit & Correction Modal */}
+      {editModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-surface-raised rounded-3xl border border-border-light shadow-2xl max-w-lg w-full p-6 animate-fade-in-up">
+            <div className="flex items-center justify-between mb-4 border-b border-border-light pb-3">
+              <div className="flex items-center gap-2">
+                <Edit3 className="w-5 h-5 text-primary-600" />
+                <h3 className="font-bold text-text-primary text-base font-heading">
+                  Physician Correction: {editModal.title}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditModal({ isOpen: false, sectionKey: '', title: '', textValue: '' })}
+                className="p-1 text-text-muted hover:text-text-primary cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              <label className="text-xs font-bold text-text-secondary">
+                Clinical Finding / Correction (Physician Overrule):
+              </label>
+              <textarea
+                rows={5}
+                value={editModal.textValue}
+                onChange={(e) => setEditModal(prev => ({ ...prev, textValue: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl border border-border-light bg-surface-muted text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 font-sans leading-relaxed"
+                placeholder="Enter corrected clinical notes, ICD diagnosis or revised symptoms..."
+              />
+              <p className="text-[11px] text-text-muted">
+                ℹ️ Your clinical overrule will be marked as "Corrected by Physician" in the ABDM EHR Bundle and signed with your Practitioner Registration Number.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setEditModal({ isOpen: false, sectionKey: '', title: '', textValue: '' })}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={Check}
+                onClick={handleSaveCorrection}
+              >
+                Save & Verify Correction
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
-function SummarySection({ title, content, source, status, onConfirm, onReject, onViewSource }) {
+function SummarySection({ title, content, source, status, onConfirm, onEdit, onReject, onViewSource }) {
   return (
     <Card>
       <div className="flex items-center justify-between mb-2">
         <h3 className="font-bold text-text-primary font-heading text-base">{title}</h3>
-        <VerificationButtons status={status} onConfirm={onConfirm} onReject={onReject} />
+        <VerificationButtons status={status} onConfirm={onConfirm} onEdit={onEdit} onReject={onReject} />
       </div>
       <p className="text-sm text-text-secondary leading-relaxed">{content}</p>
       <div className="flex items-center justify-between mt-3 pt-2 border-t border-border-light text-xs">

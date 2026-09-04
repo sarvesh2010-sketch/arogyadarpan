@@ -71,16 +71,25 @@ export default function CompletionScreen() {
             </p>
           </div>
 
-          <Button
-            variant="primary"
-            size="lg"
-            fullWidth
-            onClick={() => navigate('/doctor')}
-            iconRight={ArrowRight}
-            className="shadow-lg shadow-primary-500/25"
-          >
-            {t('doctorDashboard', 'View Doctor Dashboard')}
-          </Button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => navigate('/patient/dashboard')}
+              iconRight={ArrowRight}
+            >
+              View Patient Dashboard
+            </Button>
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={() => navigate('/doctor')}
+              iconRight={ArrowRight}
+              className="shadow-lg shadow-primary-500/25"
+            >
+              {t('doctorDashboard', 'Doctor Dashboard')}
+            </Button>
+          </div>
 
           <div className="flex gap-3">
             <Button

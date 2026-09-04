@@ -1,14 +1,38 @@
-import { useState, useCallback, useMemo } from 'react'
-import { getQuestionSequence, COMPLETENESS_CATEGORIES } from '../data/questionBank'
+import { useState, useCallback, useMemo, useEffect } from 'react'
+import {
+  getQuestionSequence,
+  getAYUSHQuestionSequence,
+  COMPLETENESS_CATEGORIES,
+  evaluateAdaptiveQuestions
+} from '../data/questionBank'
 import { calculateClinicalTriage } from '../services/triageEngine'
+import {
+  saveActiveInterviewState,
+  getActiveInterviewState,
+  getActiveResponses,
+  clearPatientSession
+} from '../services/sessionStore'
 
 export function useInterview(initialComplaint = null) {
-  const [selectedComplaint, setSelectedComplaint] = useState(initialComplaint)
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [responses, setResponses] = useState([])
-  const [isComplete, setIsComplete] = useState(false)
-  const [mode, setMode] = useState('modern') // 'modern' | 'ayush'
+  // Restore saved interview state if present
+  const savedState = useMemo(() => getActiveInterviewState(), [])
+  const savedResponses = useMemo(() => getActiveResponses(), [])
+
+  const [selectedComplaint, setSelectedComplaint] = useState(
+    savedState?.selectedComplaint || initialComplaint || null
+  )
+  const [currentIndex, setCurrentIndex] = useState(savedState?.currentIndex || 0)
+  const [responses, setResponses] = useState(
+    savedState?.responses || (savedResponses.length > 0 ? savedResponses : [])
+  )
+  const [isComplete, setIsComplete] = useState(savedState?.isComplete || false)
+  const [mode, setModeState] = useState(savedState?.mode || 'modern') // 'modern' | 'ayush'
   const [isLowLiteracy, setIsLowLiteracy] = useState(false)
+
+  const setMode = useCallback((newMode) => {
+    setModeState(newMode)
+    setCurrentIndex(0) // Switch cleanly to question 1 of the chosen track
+  }, [])
 
   // Calculate live clinical triage analysis from current responses
   const triageData = useMemo(() => {
@@ -17,20 +41,14 @@ export function useInterview(initialComplaint = null) {
 
   // Build question sequence based on selected complaint, mode, and dynamic triage insights
   const questions = useMemo(() => {
-    let base = getQuestionSequence(selectedComplaint || 'chest_pain')
-    if (mode === 'ayush') {
-      base = [
-        ...base,
-        { id: 'ayush_prakriti', question: 'What is your primary Ayurvedic Constitution (Prakriti)?', type: 'single_select', options: [{ value: 'vata', label: 'Vata (Air/Space)' }, { value: 'pitta', label: 'Pitta (Fire/Water)' }, { value: 'kapha', label: 'Kapha (Earth/Water)' }], category: 'past_history' },
-        { id: 'ayush_agni', question: 'How is your digestive fire (Agni)?', type: 'single_select', options: [{ value: 'sama', label: 'Sama Agni (Normal)' }, { value: 'visham', label: 'Visham Agni (Irregular)' }, { value: 'tikshna', label: 'Tikshna Agni (Hyperactive)' }, { value: 'manda', label: 'Manda Agni (Low/Slow)' }], category: 'associated_symptoms' },
-      ]
-    }
+    let base = mode === 'ayush'
+      ? getAYUSHQuestionSequence(selectedComplaint || 'chest_pain')
+      : getQuestionSequence(selectedComplaint || 'chest_pain')
 
     // Inject dynamic follow-up questions if discovered by triage engine and not already in sequence
     if (triageData.dynamicQuestions && triageData.dynamicQuestions.length > 0) {
       triageData.dynamicQuestions.forEach(dq => {
         if (!base.some(q => q.id === dq.id)) {
-          // Insert after associated symptoms or near the end before review
           const insertIdx = base.findIndex(q => q.id === 'ros_systems')
           if (insertIdx >= 0) {
             base.splice(insertIdx, 0, dq)
@@ -41,8 +59,40 @@ export function useInterview(initialComplaint = null) {
       })
     }
 
+    // Dynamic Clinical Decision Tree: Inject adaptive follow-up branching questions
+    const adaptiveFollowUps = evaluateAdaptiveQuestions(responses)
+    adaptiveFollowUps.forEach(aq => {
+      if (!base.some(q => q.id === aq.id)) {
+        const triggerIdx = base.findIndex(q => q.id === aq.dependsOn?.questionId)
+        if (triggerIdx >= 0) {
+          base.splice(triggerIdx + 1, 0, aq)
+        } else {
+          base.push(aq)
+        }
+      }
+    })
+
     return base
-  }, [selectedComplaint, mode, triageData.dynamicQuestions])
+  }, [selectedComplaint, mode, triageData.dynamicQuestions, responses])
+
+  // Real-time auto-saving of interview progress to sessionStore
+  useEffect(() => {
+    saveActiveInterviewState({
+      currentIndex,
+      responses,
+      selectedComplaint,
+      mode,
+      isComplete,
+    })
+    // Also keep arogyadarpan responses updated in storage
+    if (responses.length > 0) {
+      try {
+        localStorage.setItem('arogya_responses', JSON.stringify(responses))
+      } catch (e) {
+        console.warn('Storage error:', e)
+      }
+    }
+  }, [currentIndex, responses, selectedComplaint, mode, isComplete])
 
   const currentQuestion = questions[currentIndex] || null
   const totalQuestions = questions.length
@@ -112,6 +162,20 @@ export function useInterview(initialComplaint = null) {
     }
   }, [currentIndex])
 
+  const jumpToQuestion = useCallback((index) => {
+    if (index >= 0 && index < questions.length) {
+      setCurrentIndex(index)
+    }
+  }, [questions.length])
+
+  const resetInterview = useCallback(() => {
+    clearPatientSession()
+    setCurrentIndex(0)
+    setResponses([])
+    setSelectedComplaint(null)
+    setIsComplete(false)
+  }, [])
+
   return {
     currentQuestion,
     currentIndex,
@@ -132,5 +196,7 @@ export function useInterview(initialComplaint = null) {
     submitResponse,
     nextQuestion,
     previousQuestion,
+    jumpToQuestion,
+    resetInterview,
   }
 }

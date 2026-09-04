@@ -768,6 +768,35 @@ export const COMMON_HISTORY_QUESTIONS = [
     category: 'past_history'
   },
   {
+    id: 'past_surgical',
+    question: 'Past Surgical History: Have you undergone any surgeries, operations, or hospital admissions in the past?',
+    questionHi: 'पिछला सर्जिकल इतिहास: क्या आपकी पहले कोई सर्जरी, ऑपरेशन या अस्पताल में भर्ती हुई है?',
+    questions: {
+      hi: 'पिछला सर्जिकल इतिहास: क्या आपकी पहले कोई सर्जरी, ऑपरेशन या अस्पताल में भर्ती हुई है?',
+      bn: 'পূর্ববর্তী অস্ত্রোপচারের ইতিহাস: আপনার কি অতীতে কোনো সার্জারি বা অপারেশন হয়েছে?',
+      ta: 'முந்தைய அறுவை சிகிச்சை வரலாறு: நீங்கள் ஏதேனும் அறுவை சிகிச்சை செய்துள்ளீர்களா?',
+      te: 'గత శస్త్రచికిత్స చరిత్ర: మీరు గతంలో ఏదైనా శస్త్రచికిత్స చేయించుకున్నారా?',
+      mr: 'मागील शस्त्रक्रिया इतिहास: तुमची यापूर्वी कोणती शस्त्रक्रिया किंवा ऑपरेशन झाले आहे का?',
+      gu: 'પાછલો સર્જીકલ ઇતિહાસ: શું તમારી અગાઉ કોઈ સર્જરી કે ઓપરેશન થયું છે?',
+      kn: 'ಹಿಂದಿನ ಶಸ್ತ್ರಚಿಕಿತ್ಸಾ ಇತಿಹಾಸ: ನೀವು ಹಿಂದೆ ಯಾವುದೇ ಶಸ್ತ್ರಚಿಕಿತ್ಸೆಗೆ ಒಳಗಾಗಿದ್ದೀರಾ?',
+      pa: 'ਪਿਛਲਾ ਸਰਜਰੀ ਦਾ ਇਤਿਹਾਸ: ਕੀ ਤੁਹਾਡੀ ਪਹਿਲਾਂ ਕੋਈ ਸਰਜਰੀ ਜਾਂ ਆਪ੍ਰੇਸ਼ਨ ਹੋਇਆ ਹੈ?',
+      ml: 'മുൻകാല ശസ്ത്രക്രിയ വിവരങ്ങൾ: മുൻപ് എന്തെങ്കിലും ശസ്ത്രക്രിയകൾ ചെയ്തിട്ടുണ്ടോ?',
+    },
+    type: 'multi_select',
+    options: [
+      { value: 'appendectomy', label: 'Appendectomy (Appendix removal)', labelHi: 'अपेंडिक्स सर्जरी' },
+      { value: 'cholecystectomy', label: 'Cholecystectomy (Gallbladder removal)', labelHi: 'पित्ताशय की थैली (Gallbladder) सर्जरी' },
+      { value: 'c_section', label: 'Cesarean Section (C-Section)', labelHi: 'सिजेरियन डिलीवरी (C-Section)' },
+      { value: 'cardiac_surgery', label: 'Heart Surgery / Stent / Bypass (CABG)', labelHi: 'हार्ट सर्जरी / स्टेंट / बाईपास' },
+      { value: 'hernia_repair', label: 'Hernia Repair', labelHi: 'हर्निया ऑपरेशन' },
+      { value: 'orthopedic_surgery', label: 'Orthopedic / Bone Fracture / Joint Surgery', labelHi: 'हड्डी / फ्रैक्चर / जोड़ सर्जरी' },
+      { value: 'cataract_surgery', label: 'Cataract / Eye Surgery', labelHi: 'मोतियाबिंद / आँख की सर्जरी' },
+      { value: 'other_surgery', label: 'Other Surgery / Minor Procedure', labelHi: 'अन्य सर्जरी' },
+      { value: 'none', label: 'No Prior Surgeries', labelHi: 'कोई पूर्व सर्जरी नहीं' }
+    ],
+    category: 'past_surgical'
+  },
+  {
     id: 'current_medications',
     question: 'Current Medications: Name all medicines you take regularly with dosage if known.',
     questionHi: 'वर्तमान दवाइयाँ: आप नियमित रूप से जो भी दवाइयाँ लेते हैं, उनके नाम बताएं।',
@@ -896,10 +925,15 @@ export const COMMON_HISTORY_QUESTIONS = [
     },
     type: 'multi_select',
     options: [
-      { value: 'ros_fever', label: 'Fever / Chills', labelHi: 'बुखार / कंपकंपी' },
-      { value: 'ros_rash', label: 'Skin Rash', labelHi: 'त्वचा पर दाने' },
-      { value: 'ros_joint', label: 'Joint Stiffness', labelHi: 'जोड़ों में अकड़न' },
-      { value: 'ros_none', label: 'None of these', labelHi: 'इनमें से कोई नहीं' }
+      { value: 'ros_fever', label: 'Fever / Chills / Night Sweats (General)', labelHi: 'बुखार / कंपकंपी / पसीना' },
+      { value: 'ros_respiratory', label: 'Cough / Shortness of Breath / Wheezing (Respiratory)', labelHi: 'खांसी / सांस फूलना (श्वसन)' },
+      { value: 'ros_cardio', label: 'Chest Pressure / Palpitations / Swelling (Cardio)', labelHi: 'सीने में दबाव / धड़कन तेज / पैरों में सूजन' },
+      { value: 'ros_gi', label: 'Acidity / Vomiting / Bowel Changes (Gastrointestinal)', labelHi: 'एसिडिटी / उल्टी / दस्त / कब्ज' },
+      { value: 'ros_urinary', label: 'Burning or Frequent Urination (Urinary)', labelHi: 'पेशाब में जलन या बार-बार आना' },
+      { value: 'ros_neuro', label: 'Dizziness / Severe Headache / Numbness (Neurological)', labelHi: 'चक्कर आना / तेज सिरदर्द / सुन्नपन' },
+      { value: 'ros_musculo', label: 'Joint Pain / Muscle Stiffness (Musculoskeletal)', labelHi: 'जोड़ों में दर्द / मांसपेशियों में अकड़न' },
+      { value: 'ros_skin', label: 'Skin Rash / Itching / Lesions (Dermatology)', labelHi: 'त्वचा पर दाने / खुजली' },
+      { value: 'ros_none', label: 'None of these symptoms', labelHi: 'इनमें से कोई नहीं' }
     ],
     category: 'associated_symptoms'
   },
@@ -978,6 +1012,205 @@ export function getQuestionSequence(complaintId) {
   ]
 }
 
+/**
+ * AYUSH CLINICAL INTAKE SEQUENCE
+ * Dedicated clinical track for Ayurveda & Traditional Indian Medicine
+ * Implements Dashavidha Pariksha (10-fold examination) + Roga Avastha + Ahara/Nidra
+ */
+export function getAYUSHQuestionSequence(complaintId) {
+  return [
+    {
+      id: 'chief_complaint',
+      question: 'Roga Lakshana: What main symptom or health concern brings you to the AYUSH clinic today?',
+      questionHi: 'रोग लक्षण: आज आप किस मुख्य स्वास्थ्य समस्या या लक्षण के कारण आए हैं?',
+      questions: {
+        hi: 'रोग लक्षण: आज आप किस मुख्य स्वास्थ्य समस्या या लक्षण के कारण आए हैं?',
+        bn: 'রোগ লক্ষণ: আজ আপনি কোন প্রধান স্বাস্থ্য সমস্যার কারণে এসেছেন?',
+        ta: 'நோய் அறிகுறிகள்: இன்று எந்த முக்கிய ஆரோக்கிய பிரச்சனைக்காக வந்துள்ளீர்கள்?',
+        te: 'రోగ లక్షణం: ఈరోజు మీరు ఏ ముఖ్యమైన ఆరోగ్య సమస్య కోసం వచ్చారు?',
+        mr: 'रोग लक्षण: आज तुम्ही कोणत्या मुख्य आरोग्याच्या समस्येसाठी आला आहात?',
+        gu: 'રોગ લક્ષણ: આજે તમે કઈ મુખ્ય સ્વાસ્થ્ય સમસ્યા માટે આવ્યા છો?',
+        kn: 'ರೋಗ ಲಕ್ಷಣ: ಇಂದು ನೀವು ಯಾವ ಮುಖ್ಯ ಆರೋಗ್ಯ ಸಮಸ್ಯೆಗಾಗಿ ಬಂದಿದ್ದೀರಿ?',
+        pa: 'ਰੋਗ ਲੱਛਣ: ਅੱਜ ਤੁਸੀਂ ਕਿਸ ਮੁੱਖ ਸਿਹਤ ਸਮੱਸਿਆ ਲਈ ਆਏ ਹੋ?',
+        ml: 'രോഗ ലക്ഷണം: ഇന്ന് പ്രധാനമായും എന്ത് ബുദ്ധിമുട്ടിനാണ് എത്തിയത്?',
+      },
+      type: 'complaint_select',
+      category: 'chief_complaint',
+      required: true
+    },
+    {
+      id: 'ayush_duration',
+      question: 'Roga Avastha (Chronicity): How long has this condition persisted?',
+      questionHi: 'रोग अवस्था: यह समस्या कितने समय से है? (नया / पुराना / जीर्ण रोग)',
+      type: 'single_select',
+      options: [
+        { value: 'nava_roga', label: 'Nava Roga (Acute — Under 7 days)', labelHi: 'नव रोग (नया — 7 दिनों के भीतर)' },
+        { value: 'madhyama_avastha', label: 'Madhyama Avastha (Subacute — 1 to 4 weeks)', labelHi: 'मध्यम अवस्था (1 से 4 सप्ताह)' },
+        { value: 'jirna_roga', label: 'Jirna Roga (Chronic — Months or Years)', labelHi: 'जीर्ण रोग (दीर्घकालिक / कई महीनों से)' }
+      ],
+      category: 'duration'
+    },
+    ...DASHAVIDHA_PARIKSHA_QUESTIONS,
+    {
+      id: 'ayush_ahara_habits',
+      question: 'Ahara Vidhi (Dietary Pattern): What kind of food dominates your daily diet?',
+      questionHi: 'आहार विधि: आपके दैनिक भोजन में किस प्रकार का आहार प्रमुख है?',
+      type: 'single_select',
+      options: [
+        { value: 'snigdha_madhura', label: 'Snigdha & Madhura (Oily, sweet, heavy, dairy)', labelHi: 'स्निग्ध व मधुर (घी, तेल, मीठा)' },
+        { value: 'tikshna_lavana', label: 'Katu & Lavana (Spicy, salty, sour, fried)', labelHi: 'कटु व लवण (तीखा, खट्टा, नमकीन)' },
+        { value: 'ruksha_laghu', label: 'Ruksha & Laghu (Dry, light, raw salads, fast food)', labelHi: 'रूखा व हल्का (सूखा भोजन, फास्ट फूड)' },
+        { value: 'samashana', label: 'Balanced traditional homemade Indian diet', labelHi: 'संतुलित पारंपरिक घर का भोजन' }
+      ],
+      category: 'ayush'
+    },
+    {
+      id: 'ayush_nidra',
+      question: 'Nidra (Sleep Quality): Describe your sleep patterns and nighttime rest.',
+      questionHi: 'निद्रा: आपकी नींद की गुणवत्ता कैसी है?',
+      type: 'single_select',
+      options: [
+        { value: 'sukha_nidra', label: 'Sukha Nidra (Sound, refreshing, undisturbed sleep)', labelHi: 'सुख निद्रा (गहरी व आरामदायक नींद)' },
+        { value: 'anidra', label: 'Anidra / Khandita (Disturbed, insomnia, waking frequently)', labelHi: 'अ sleep / टूटी हुई नींद / अनिद्रा' },
+        { value: 'ati_nidra', label: 'Ati Nidra (Excessive sleepiness, morning lethargy)', labelHi: 'अति निद्रा (अधिक सोना, सुबह सुस्ती)' }
+      ],
+      category: 'ayush'
+    },
+    {
+      id: 'current_medications',
+      question: 'Current Medications & Formulations: Are you taking any modern medicines, Ayurvedic churnas, or kwaths?',
+      questionHi: 'वर्तमान दवाएं: क्या आप कोई एलोपैथिक दवा, आयुर्वेदिक चूर्ण, काढ़ा या भस्म ले रहे हैं?',
+      type: 'text_input',
+      category: 'medications'
+    }
+  ]
+}
+
+/**
+ * ADAPTIVE CLINICAL DECISION TREE — Branching Questions
+ * Triggered dynamically based on previous patient responses
+ */
+export const ADAPTIVE_BRANCHING_QUESTIONS = [
+  {
+    id: 'onset_activity',
+    question: 'Sudden Onset Detail: What activity were you doing when the sudden pain started?',
+    questionHi: 'अचानक शुरुआत विवरण: जब दर्द अचानक शुरू हुआ, तब आप क्या कर रहे थे?',
+    type: 'single_select',
+    options: [
+      { value: 'heavy_exertion', label: 'Heavy physical exertion / Climbing stairs', labelHi: 'भारी शारीरिक काम / सीढ़ियां चढ़ना' },
+      { value: 'resting', label: 'Resting / Sitting quietly', labelHi: 'आराम कर रहे थे / बैठे थे' },
+      { value: 'emotional_stress', label: 'Under severe mental stress / Anger', labelHi: 'तनाव / गुस्सा' },
+      { value: 'woke_from_sleep', label: 'Woke up from sleep with pain', labelHi: 'नींद से दर्द के कारण जागे' },
+    ],
+    category: 'duration',
+    dependsOn: {
+      questionId: 'socrates_onset',
+      values: ['sudden_today', 'today'],
+    },
+    reason: 'Adaptive trigger: Sudden onset requires exertion vs rest differentiation for Acute Coronary Syndrome (ACS).'
+  },
+  {
+    id: 'cardiac_red_flag',
+    question: 'Red-Flag Assessment: Are you experiencing profuse cold sweating, vomiting, or dizziness?',
+    questionHi: 'गंभीर लक्षण (Red-Flag): क्या आपको ठंडा पसीना, उल्टी या चक्कर आ रहे हैं?',
+    type: 'yes_no',
+    category: 'associated_symptoms',
+    dependsOn: {
+      questionId: 'socrates_radiation',
+      values: ['left_arm', 'jaw_neck', 'back'],
+    },
+    reason: 'Adaptive trigger: Radiating chest pain requires immediate cardiac red-flag assessment.'
+  },
+  {
+    id: 'surgical_details',
+    question: 'Surgical Details: In what year was your surgery performed, and were there any complications?',
+    questionHi: 'सर्जरी विवरण: आपकी सर्जरी किस वर्ष हुई थी और क्या कोई जटिलता हुई थी?',
+    type: 'text',
+    placeholder: 'e.g. 2018 at District Hospital, recovery was normal',
+    category: 'past_surgical',
+    dependsOn: {
+      questionId: 'past_surgical',
+      customCondition: (val) => Array.isArray(val) && val.length > 0 && !val.includes('none'),
+    },
+    reason: 'Adaptive trigger: Documenting timeline and post-operative complications for reported surgeries.'
+  },
+  {
+    id: 'allergy_reaction_type',
+    question: 'Allergy Reaction: What specific reaction occurs when you take this medicine?',
+    questionHi: 'एलर्जी की प्रतिक्रिया: यह दवा लेने पर आपको क्या समस्या होती है?',
+    type: 'single_select',
+    options: [
+      { value: 'anaphylaxis', label: 'Severe breathing difficulty / Throat swelling (Anaphylaxis)', labelHi: 'सांस लेने में भारी तकलीफ / गले में सूजन' },
+      { value: 'skin_rash', label: 'Skin rash / Hives / Itching', labelHi: 'त्वचा पर दाने / खुजली' },
+      { value: 'swelling', label: 'Facial or Lip Swelling', labelHi: 'चेहरे या होंठ पर सूजन' },
+      { value: 'nausea_gi', label: 'Nausea / Stomach upset only', labelHi: 'केवल जी मिचलाना / पेट खराब' },
+    ],
+    category: 'allergies',
+    dependsOn: {
+      questionId: 'allergies',
+      customCondition: (val) => val && typeof val === 'string' && val.trim().length > 3 && !val.toLowerCase().includes('none') && !val.toLowerCase().includes('no'),
+    },
+    reason: 'Adaptive trigger: Differentiating true IgE anaphylaxis from mild drug intolerance.'
+  },
+]
+
+/**
+ * Dynamically evaluate which adaptive follow-up questions should be injected into the interview queue
+ */
+export function evaluateAdaptiveQuestions(responses = []) {
+  const activeFollowUps = []
+
+  for (const q of ADAPTIVE_BRANCHING_QUESTIONS) {
+    const triggerResp = responses.find(r => r.questionId === q.dependsOn.questionId)
+    if (!triggerResp) continue
+
+    const val = triggerResp.structuredValue ?? triggerResp.originalResponse
+
+    let matches = false
+    if (q.dependsOn.values) {
+      matches = q.dependsOn.values.includes(val) || (Array.isArray(val) && val.some(v => q.dependsOn.values.includes(v)))
+    } else if (q.dependsOn.customCondition) {
+      matches = q.dependsOn.customCondition(val)
+    }
+
+    if (matches) {
+      activeFollowUps.push(q)
+    }
+  }
+
+  return activeFollowUps
+}
+
+/**
+ * Standard Clinical History Templates
+ */
+export const CLINICAL_TEMPLATES = {
+  cardiac: {
+    id: 'cardiac',
+    name: 'Cardiovascular / Chest Pain Template',
+    ontology: 'SOCRATES + Framingham Risk Factors',
+    focus: 'ACS, Aortic Dissection, PE Exclusion, ESI 2 Triage',
+  },
+  respiratory: {
+    id: 'respiratory',
+    name: 'Respiratory / Dyspnea Template',
+    ontology: 'MRC Dyspnea Scale + GOLD Guidelines',
+    focus: 'Asthma/COPD Exacerbation, Pneumonia, SpO2 correlation',
+  },
+  gastrointestinal: {
+    id: 'gastrointestinal',
+    name: 'Gastrointestinal / Acute Abdomen Template',
+    ontology: 'Peritoneal Signs + Rome IV Criteria',
+    focus: 'Appendicitis, Cholecystitis, Peptic Ulcer, Bowel Obstruction',
+  },
+  general: {
+    id: 'general',
+    name: 'General OPD Clinical Intake Template',
+    ontology: 'Comprehensive Review of Systems (ROS)',
+    focus: 'Multisystem chronic care & preventive checkup',
+  },
+}
+
 export function getLocalizedQuestion(q, lang = 'en') {
   if (!q) return ''
   if (lang === 'en') return q.question
@@ -999,7 +1232,8 @@ export const COMPLETENESS_CATEGORIES = [
   { id: 'duration', label: 'Duration / Onset', labelHi: 'अवधि' },
   { id: 'severity', label: 'Severity (1-10)', labelHi: 'गंभीरता' },
   { id: 'associated_symptoms', label: 'Associated Symptoms (SOCRATES)', labelHi: 'संबंधित लक्षण' },
-  { id: 'past_history', label: 'Past Medical / Surgical', labelHi: 'पूर्व इतिहास' },
+  { id: 'past_history', label: 'Past Medical History', labelHi: 'पूर्व मेडिकल इतिहास' },
+  { id: 'past_surgical', label: 'Past Surgical History', labelHi: 'पूर्व सर्जिकल इतिहास' },
   { id: 'medications', label: 'Current Medications', labelHi: 'दवाइयाँ' },
   { id: 'allergies', label: 'Drug Allergies', labelHi: 'एलर्जी' },
   { id: 'ayush', label: 'Dashavidha Pariksha (AYUSH)', labelHi: 'दशविध परीक्षा' },

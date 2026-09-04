@@ -3,7 +3,7 @@
 // Manages live patient session responses, OCR extractions, and timeline construction
 // ============================
 
-import { getDemoPatient } from '../data/demoPatients'
+import { getDemoPatient } from '../data/demoPatients.js'
 
 const CLINICAL_LABEL_MAP = {
   // Complaints
@@ -175,7 +175,196 @@ export function getActiveDocuments() {
 }
 
 /**
- * Clear all current session keys cleanly upon completion
+ * Generate a unique Patient ID (e.g. AD-2026-84920)
+ */
+export function generatePatientId() {
+  const year = new Date().getFullYear()
+  const randomNum = Math.floor(10000 + Math.random() * 90000)
+  return `AD-${year}-${randomNum}`
+}
+
+export const INITIAL_REGISTERED_PATIENTS = [
+  {
+    patientId: 'AD-2026-10492',
+    name: 'Rahul Sharma',
+    age: '46',
+    dob: '1980-04-15',
+    gender: 'Male',
+    phone: '9876543210',
+    abhaId: 'ABHA-1234-5678',
+    bloodGroup: 'B+',
+    address: 'B-14, Model Town, Jaipur, Rajasthan',
+    pincode: '302015',
+    emergencyContact: 'Sunita Sharma (Wife)',
+    emergencyPhone: '9876543211',
+    relationship: 'Spouse',
+    pastMedicalHistory: ['Hypertension', 'Type 2 Diabetes'],
+    pastSurgicalHistory: ['Appendectomy (2018)'],
+    knownAllergies: ['Penicillin'],
+  },
+  {
+    patientId: 'AD-2026-29481',
+    name: 'Sunita Devi',
+    age: '54',
+    dob: '1972-08-22',
+    gender: 'Female',
+    phone: '9811223344',
+    abhaId: 'ABHA-5678-9012',
+    bloodGroup: 'O+',
+    address: 'Flat 402, Green Valley Apartments, Delhi',
+    pincode: '110001',
+    emergencyContact: 'Rajesh Kumar (Son)',
+    emergencyPhone: '9811223345',
+    relationship: 'Child',
+    pastMedicalHistory: ['Hypothyroidism', 'Asthma'],
+    pastSurgicalHistory: ['Cholecystectomy (Gallbladder, 2021)'],
+    knownAllergies: ['Sulfa drugs'],
+  },
+  {
+    patientId: 'AD-2026-38290',
+    name: 'Ramesh Patel',
+    age: '62',
+    dob: '1964-11-03',
+    gender: 'Male',
+    phone: '9723456789',
+    abhaId: 'ABHA-9012-3456',
+    bloodGroup: 'A+',
+    address: '12, Shanti Nagar, Ahmedabad, Gujarat',
+    pincode: '380009',
+    emergencyContact: 'Meena Patel (Wife)',
+    emergencyPhone: '9723456780',
+    relationship: 'Spouse',
+    pastMedicalHistory: ['Coronary Artery Disease', 'Hypertension'],
+    pastSurgicalHistory: ['Cardiac Stent / Angioplasty (2020)'],
+    knownAllergies: ['No known drug allergies'],
+  },
+  {
+    patientId: 'AD-2026-47123',
+    name: 'Priya Nair',
+    age: '29',
+    dob: '1997-02-18',
+    gender: 'Female',
+    phone: '9447123456',
+    abhaId: 'ABHA-3456-7890',
+    bloodGroup: 'AB+',
+    address: 'Kalyan Nagar, Kochi, Kerala',
+    pincode: '682016',
+    emergencyContact: 'Suresh Nair (Father)',
+    emergencyPhone: '9447123450',
+    relationship: 'Father',
+    pastMedicalHistory: ['None'],
+    pastSurgicalHistory: ['None'],
+    knownAllergies: ['Dust / Pollen'],
+  }
+]
+
+/**
+ * Retrieve registered patient registry from localStorage or initial seed
+ */
+export function getRegisteredPatients() {
+  try {
+    const stored = localStorage.getItem('arogya_registered_patients')
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    }
+  } catch (e) {
+    console.warn('Patient registry error:', e)
+  }
+  return INITIAL_REGISTERED_PATIENTS
+}
+
+/**
+ * Save / update a patient in the registry
+ */
+export function saveRegisteredPatient(patientData) {
+  const currentList = getRegisteredPatients()
+  const patientId = patientData.patientId || generatePatientId()
+  const fullProfile = {
+    ...patientData,
+    patientId,
+    updatedAt: new Date().toISOString()
+  }
+
+  const existingIdx = currentList.findIndex(
+    p => p.patientId === patientId || (p.phone && p.phone === fullProfile.phone)
+  )
+
+  let updatedList
+  if (existingIdx >= 0) {
+    updatedList = [...currentList]
+    updatedList[existingIdx] = { ...updatedList[existingIdx], ...fullProfile }
+  } else {
+    updatedList = [fullProfile, ...currentList]
+  }
+
+  try {
+    localStorage.setItem('arogya_registered_patients', JSON.stringify(updatedList))
+  } catch (e) {
+    console.warn('Could not save patient registry:', e)
+  }
+
+  return fullProfile
+}
+
+/**
+ * Find patient by phone, patient ID, or ABHA ID
+ */
+export function findPatientByIdentifier(query) {
+  if (!query) return null
+  const cleanQuery = String(query).trim().toLowerCase()
+  const list = getRegisteredPatients()
+
+  return list.find(p =>
+    (p.phone && p.phone.replace(/\D/g, '') === cleanQuery.replace(/\D/g, '')) ||
+    (p.patientId && p.patientId.toLowerCase() === cleanQuery) ||
+    (p.abhaId && p.abhaId.toLowerCase() === cleanQuery)
+  ) || null
+}
+
+/**
+ * Check whether an active incomplete session exists
+ */
+export function hasActiveSession() {
+  try {
+    const patient = localStorage.getItem('arogya_patient')
+    const state = localStorage.getItem('arogya_interview_state')
+    const responses = localStorage.getItem('arogya_responses')
+    return Boolean(patient && (state || responses))
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Save real-time interview state to localStorage
+ */
+export function saveActiveInterviewState(state) {
+  try {
+    localStorage.setItem('arogya_interview_state', JSON.stringify({
+      ...state,
+      savedAt: new Date().toISOString(),
+    }))
+  } catch (e) {
+    console.warn('Failed to save active interview state:', e)
+  }
+}
+
+/**
+ * Retrieve saved real-time interview state
+ */
+export function getActiveInterviewState() {
+  try {
+    const stored = localStorage.getItem('arogya_interview_state')
+    if (stored) return JSON.parse(stored)
+  } catch (e) {
+    console.warn('Failed to get interview state:', e)
+  }
+  return null
+}
+
+/**
+ * Clear all current session keys cleanly upon completion or exit
  */
 export function clearPatientSession() {
   try {
@@ -184,6 +373,7 @@ export function clearPatientSession() {
     localStorage.removeItem('arogya_documents')
     localStorage.removeItem('arogya_patient')
     localStorage.removeItem('arogya_consent')
+    localStorage.removeItem('arogya_interview_state')
   } catch (e) {
     console.warn('Session clear error:', e)
   }
@@ -198,8 +388,9 @@ export function buildDynamicTimeline() {
   const documents = getActiveDocuments()
 
   const timeline = []
+  const currentYear = new Date().getFullYear()
 
-  // 1. Add current visit event from active interview responses
+  // 1. Add current visit event from active interview responses (Current Complaint)
   const chiefComplaintResp = responses.find(r => r.questionId === 'chief_complaint')
   const onsetResp = responses.find(r => r.questionId === 'socrates_onset' || r.questionId === 'cp_onset' || r.questionId === 'generic_onset' || r.questionId === 'f_onset' || r.questionId === 'sp_onset')
   const severityResp = responses.find(r => r.questionId.includes('severity'))
@@ -213,25 +404,69 @@ export function buildDynamicTimeline() {
     id: 'tl-current',
     date: new Date().toISOString().split('T')[0],
     eventType: 'consultation',
-    title: `Current Visit — ${complaintFormatted.toUpperCase()}`,
+    title: `Current Complaint — ${complaintFormatted.toUpperCase()}`,
     description: `Patient ${patient.name || 'User'} presents with ${complaintFormatted} starting ${onsetFormatted}${severityText}.`,
     sourceResponseId: 'chief_complaint',
     verificationStatus: 'unverified',
   })
 
-  // 2. Add events from uploaded OCR documents
+  // 2. Synthesize Historical Milestones from Intake Responses (Past Medical, Surgical, Meds)
+  const pastMedResp = responses.find(r => r.questionId === 'past_medical')
+  if (pastMedResp) {
+    const val = pastMedResp.structuredValue
+    const conditions = Array.isArray(val) ? val : [val]
+    conditions.filter(Boolean).forEach((cond, idx) => {
+      // Create historical staggered timeline points (e.g. 2019, 2022)
+      const historicalYear = currentYear - (5 - idx * 2)
+      timeline.push({
+        id: `tl-hist-cond-${idx}`,
+        date: `${Math.max(2018, historicalYear)}-04-10`,
+        eventType: 'diagnosis',
+        title: `${formatClinicalValue(cond)} Diagnosed`,
+        description: `Longstanding condition documented during patient intake interview.`,
+        verificationStatus: 'patient_confirmed',
+      })
+    })
+  }
+
+  const surgicalResp = responses.find(r => r.questionId === 'past_surgical')
+  if (surgicalResp && surgicalResp.structuredValue && surgicalResp.structuredValue !== 'None') {
+    timeline.push({
+      id: 'tl-hist-surg',
+      date: `${currentYear - 2}-08-20`,
+      eventType: 'surgery',
+      title: `Prior Procedure / Surgery: ${formatClinicalValue(surgicalResp.structuredValue)}`,
+      description: `Surgical history recorded during clinical interview.`,
+      verificationStatus: 'patient_confirmed',
+    })
+  }
+
+  // 3. Add events from uploaded OCR documents
   documents.forEach((doc, idx) => {
     const extraction = doc.extraction || {}
     const docDate = extraction.documentDate || doc.documentDate || '2025-05-12'
+    const docType = extraction.documentType || doc.category || 'Medical Record'
 
-    // Diagnoses
-    if (extraction.extractedData?.diagnosis?.length > 0) {
-      extraction.extractedData.diagnosis.forEach((diag, dIdx) => {
+    // Document Classification Header Event
+    timeline.push({
+      id: `tl-doc-header-${idx}`,
+      date: docDate,
+      eventType: 'consultation',
+      title: `${docType}: ${doc.fileName || 'Uploaded Record'}`,
+      description: `Documented clinical encounter from ${doc.fileName}. Verified date: ${docDate}.`,
+      sourceDocumentId: doc.id || `doc-${idx}`,
+      verificationStatus: 'patient_confirmed',
+    })
+
+    // Diagnoses from document
+    if (extraction.extractedData?.diagnosis?.length > 0 || extraction.extractedData?.diagnoses?.length > 0) {
+      const diags = extraction.extractedData?.diagnoses || extraction.extractedData?.diagnosis || []
+      diags.forEach((diag, dIdx) => {
         timeline.push({
           id: `tl-doc-diag-${idx}-${dIdx}`,
           date: docDate,
           eventType: 'diagnosis',
-          title: `Diagnosed: ${diag}`,
+          title: `Diagnosed: ${typeof diag === 'string' ? diag : diag.name}`,
           description: `Documented in ${doc.fileName || 'Uploaded Record'}`,
           sourceDocumentId: doc.id || `doc-${idx}`,
           verificationStatus: 'patient_confirmed',
@@ -239,30 +474,46 @@ export function buildDynamicTimeline() {
       })
     }
 
-    // Medications
-    if (extraction.extractedData?.medications?.length > 0) {
-      extraction.extractedData.medications.forEach((med, mIdx) => {
+    // Procedures from document
+    if (extraction.extractedData?.procedures?.length > 0) {
+      extraction.extractedData.procedures.forEach((proc, pIdx) => {
         timeline.push({
-          id: `tl-doc-med-${idx}-${mIdx}`,
+          id: `tl-doc-proc-${idx}-${pIdx}`,
           date: docDate,
-          eventType: 'medication',
-          title: `${med.name} ${med.dosage || ''} Prescribed`,
-          description: `${med.frequency || 'Regular dose'} documented in ${doc.fileName}`,
+          eventType: 'surgery',
+          title: `Clinical Procedure: ${typeof proc === 'string' ? proc : proc.name}`,
+          description: `Procedure documented in ${doc.fileName}`,
           sourceDocumentId: doc.id || `doc-${idx}`,
           verificationStatus: 'patient_confirmed',
         })
       })
     }
 
-    // Investigations
+    // Medications from document
+    if (extraction.extractedData?.medications?.length > 0) {
+      extraction.extractedData.medications.forEach((med, mIdx) => {
+        timeline.push({
+          id: `tl-doc-med-${idx}-${mIdx}`,
+          date: docDate,
+          eventType: 'medication',
+          title: `${med.name} ${med.strength || med.dosage || ''} Prescribed`,
+          description: `${med.frequency || 'Regular dose'} (${med.duration || 'Ongoing'}) documented in ${doc.fileName}`,
+          sourceDocumentId: doc.id || `doc-${idx}`,
+          verificationStatus: 'patient_confirmed',
+        })
+      })
+    }
+
+    // Investigations from document
     if (extraction.extractedData?.investigations?.length > 0) {
       extraction.extractedData.investigations.forEach((inv, iIdx) => {
+        const isAbnormal = inv.status === 'abnormal' || inv.status === 'critical'
         timeline.push({
           id: `tl-doc-inv-${idx}-${iIdx}`,
           date: docDate,
           eventType: 'investigation',
-          title: `${inv.name}: ${inv.value} ${inv.unit || ''} (${inv.status === 'abnormal' ? 'Abnormal' : 'Normal'})`,
-          description: `Lab test result from ${doc.fileName || 'Report'}. Normal Range: ${inv.normalRange || 'Standard'}.`,
+          title: `${inv.test || inv.name}: ${inv.value} ${inv.unit || ''} ${isAbnormal ? '(Abnormal ' + (inv.direction === 'high' ? '↑' : '↓') + ')' : '(Normal)'}`,
+          description: `Lab test result from ${doc.fileName || 'Report'}. Reference Range: ${inv.referenceRange || inv.normalRange || 'Standard'}.`,
           sourceDocumentId: doc.id || `doc-${idx}`,
           verificationStatus: 'patient_confirmed',
         })
@@ -270,13 +521,22 @@ export function buildDynamicTimeline() {
     }
   })
 
-  // 3. Fallback to demo timeline only if user has not answered any interview questions and has no documents
+  // 4. Fallback to demo timeline only if user has not answered any interview questions and has no documents
   if (timeline.length === 1 && responses.length === 0 && documents.length === 0) {
     const demo = getDemoPatient('demo-001')
     return demo.timeline
   }
 
-  return timeline.sort((a, b) => new Date(b.date) - new Date(a.date))
+  // Deduplicate and sort chronologically descending (newest first)
+  const seenTitles = new Set()
+  const uniqueTimeline = timeline.filter(item => {
+    const key = `${item.date}-${item.title}`
+    if (seenTitles.has(key)) return false
+    seenTitles.add(key)
+    return true
+  })
+
+  return uniqueTimeline.sort((a, b) => new Date(b.date) - new Date(a.date))
 }
 
 /**
