@@ -182,7 +182,7 @@ export default function PatientIdentification() {
   const canContinueRegistration = form.name.trim() && form.age && form.gender && form.phone.length === 10
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-surface via-surface to-primary-50/20 flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen kiosk-canvas text-slate-900 flex items-center justify-center px-4 py-8 select-none">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -193,14 +193,14 @@ export default function PatientIdentification() {
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigate('/patient/consent')}
-            className="flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-text-primary transition-colors px-2 py-1 rounded-lg hover:bg-surface-muted"
+            className="glass-pill px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5 cursor-pointer"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="size-3.5" />
             <span>{t('back', 'Back')}</span>
           </button>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 border border-primary-200">
-              Step 3 of 6
+            <span className="status-chip bg-cobalt-soft text-cobalt font-bold">
+              Step 3 of 6 • पहचान
             </span>
             <LanguageSelector variant="compact" />
           </div>
@@ -213,26 +213,34 @@ export default function PatientIdentification() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mb-5 bg-gradient-to-r from-amber-50 to-primary-50 border border-amber-200/80 rounded-2xl p-4 shadow-sm"
+              className="mb-5 bg-gradient-to-r from-amber-50 to-white border border-amber-300/80 rounded-2xl p-4 shadow-xs"
             >
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-5 h-5" />
+                <div className="size-9 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0">
+                  <Sparkles className="size-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-text-primary text-sm font-heading">
+                  <h4 className="font-bold text-slate-900 text-sm font-heading">
                     {t('activeSessionFound', 'An active session in progress was detected')}
                   </h4>
-                  <p className="text-xs text-text-secondary mt-0.5 mb-3">
+                  <p className="text-xs text-slate-600 mt-0.5 mb-3 font-medium">
                     You have saved interview responses or documents from your current visit. Would you like to resume where you left off?
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <Button size="sm" variant="primary" onClick={handleResumeSession} iconRight={ArrowRight}>
-                      {t('resumeSession', 'Resume Session')}
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={handleClearSession} icon={RotateCcw}>
-                      {t('startFresh', 'Start Fresh Intake')}
-                    </Button>
+                    <button
+                      onClick={handleResumeSession}
+                      className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-cobalt to-cobalt-deep text-white text-xs font-bold shadow-cobalt hover:brightness-110 transition cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>{t('resumeSession', 'Resume Session')}</span>
+                      <ArrowRight className="size-3.5" />
+                    </button>
+                    <button
+                      onClick={handleClearSession}
+                      className="glass-pill px-3.5 py-1.5 text-xs font-bold text-slate-600 hover:text-coral border border-slate-200 transition cursor-pointer flex items-center gap-1.5"
+                    >
+                      <RotateCcw className="size-3.5" />
+                      <span>{t('startFresh', 'Start Fresh Intake')}</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -242,41 +250,41 @@ export default function PatientIdentification() {
 
         {/* Header Title */}
         <div className="text-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-primary-500/20">
-            <User className="w-8 h-8 text-white" />
+          <div className="size-16 rounded-2xl bg-gradient-to-tr from-cobalt to-cobalt-deep flex items-center justify-center mx-auto mb-3 shadow-cobalt text-white">
+            <User className="size-8" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary font-heading mb-1.5">
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-slate-900 mb-1">
             {t('patientRegistration', 'Patient Registration & Check-in')}
           </h1>
-          <p className="text-xs sm:text-sm text-text-secondary">
+          <p className="text-xs text-slate-500 font-medium">
             {t('patientSubtitle', 'Please enter your identification details or log in as a returning patient')}
           </p>
         </div>
 
         {/* Mode Tabs: New Patient vs Existing Patient */}
-        <div className="flex p-1 bg-surface-muted rounded-2xl border border-border-light mb-6 shadow-inner">
+        <div className="flex p-1.5 bg-slate-100 rounded-2xl border border-slate-200/80 mb-6 shadow-xs">
           <button
             type="button"
             onClick={() => setActiveTab('register')}
-            className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === 'register'
-                ? 'bg-white text-primary-700 shadow-sm'
-                : 'text-text-secondary hover:text-text-primary'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
-            <User className="w-4 h-4" />
+            <User className="size-4 text-cobalt" />
             <span>{t('newRegistration', 'New Patient Registration')}</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('login')}
-            className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
               activeTab === 'login'
-                ? 'bg-white text-primary-700 shadow-sm'
-                : 'text-text-secondary hover:text-text-primary'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
-            <UserCheck className="w-4 h-4" />
+            <UserCheck className="size-4 text-emerald" />
             <span>{t('existingPatient', 'Existing Patient Login')}</span>
           </button>
         </div>

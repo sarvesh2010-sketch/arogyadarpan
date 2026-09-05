@@ -213,43 +213,47 @@ export default function PatientDetail() {
   const activeAllergies = summary.allergies ? (summary.allergies.historicalRecord ? [summary.allergies.historicalRecord] : ['Penicillin']) : []
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen kiosk-canvas text-slate-900 pb-12 select-none">
       {/* Header */}
-      <header className="bg-surface-raised border-b border-border-light px-8 py-4 sticky top-0 z-30">
+      <header className="glass-card sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md px-8 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/doctor')}
-              className="text-text-muted hover:text-text-primary transition-colors cursor-pointer p-1 rounded-lg hover:bg-surface-muted"
+              className="glass-pill p-2 text-slate-500 hover:text-slate-900 transition cursor-pointer"
+              title="Back to Dashboard"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="size-4.5" />
             </button>
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-md">
-                <Heart className="w-4 h-4 text-white" />
+              <div className="size-9 rounded-2xl bg-gradient-to-tr from-cobalt to-cobalt-deep flex items-center justify-center shadow-cobalt text-white">
+                <Stethoscope className="size-4.5" />
               </div>
-              <span className="font-extrabold text-text-primary font-heading text-lg">
-                ArogyaDarpan / MediKiosk Workbench
-              </span>
+              <div>
+                <span className="font-heading font-black text-slate-900 text-lg">
+                  ArogyaDarpan
+                </span>
+                <span className="ml-2 rounded-full bg-cobalt-soft px-2 py-0.5 text-[10px] font-bold text-cobalt border border-cobalt/20">
+                  Physician Workbench
+                </span>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              icon={Code}
+            <button
               onClick={() => setFhirModalOpen(true)}
+              className="glass-pill px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer flex items-center gap-1.5"
             >
-              FHIR Bundle JSON
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              icon={Download}
+              <Code className="size-3.5 text-cobalt" />
+              <span>FHIR Bundle JSON</span>
+            </button>
+            <button
               onClick={() => setFhirModalOpen(true)}
+              className="px-4 py-2 rounded-full bg-gradient-to-r from-cobalt to-cobalt-deep text-white text-xs font-bold shadow-cobalt hover:brightness-110 transition cursor-pointer flex items-center gap-1.5"
             >
-              Export to ABDM
-            </Button>
+              <Download className="size-3.5" />
+              <span>Export to ABDM</span>
+            </button>
           </div>
         </div>
       </header>
@@ -337,21 +341,21 @@ export default function PatientDetail() {
             )}
 
             {/* Tab Nav */}
-            <div className="flex items-center gap-1 bg-surface-raised rounded-2xl border border-border-light p-1.5 shadow-xs">
+            <div className="flex items-center gap-1.5 bg-white rounded-2xl border border-slate-200/80 p-1.5 shadow-xs overflow-x-auto">
               {tabs.map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`
-                    flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold font-heading
+                    flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold font-heading whitespace-nowrap
                     transition-all cursor-pointer
                     ${activeTab === tab.id
-                      ? 'bg-primary-500 text-white shadow-sm'
-                      : 'text-text-secondary hover:text-text-primary hover:bg-surface-muted'
+                      ? 'bg-slate-950 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                     }
                   `}
                 >
-                  <tab.icon className="w-4 h-4" />
+                  <tab.icon className="size-4" />
                   {tab.label}
                 </button>
               ))}

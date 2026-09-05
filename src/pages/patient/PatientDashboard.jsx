@@ -76,32 +76,31 @@ export default function PatientDashboard() {
   }, [responses, patient])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-surface via-surface to-primary-50/20 px-4 sm:px-8 py-8">
+    <div className="min-h-screen kiosk-canvas text-slate-900 px-4 sm:px-8 py-8 select-none pb-12">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Top Bar Navigation */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/')}
-              className="text-xs font-semibold text-text-muted hover:text-text-primary transition-colors px-3 py-1.5 rounded-xl border border-border-light bg-surface"
+              className="glass-pill px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5 cursor-pointer"
             >
               ← Home
             </button>
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-primary-100 text-primary-800 border border-primary-200">
+            <span className="status-chip bg-cobalt-soft text-cobalt font-bold">
               Patient Portal & Health Locker
             </span>
           </div>
 
           <div className="flex items-center gap-3">
             <LanguageSelector variant="compact" />
-            <Button
-              variant="outline"
-              size="sm"
-              icon={Plus}
+            <button
               onClick={() => navigate('/patient/interview')}
+              className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-cobalt to-cobalt-deep text-white text-xs font-bold shadow-cobalt hover:brightness-110 transition cursor-pointer flex items-center gap-1.5"
             >
-              Intake Interview
-            </Button>
+              <Plus className="size-3.5" />
+              <span>Intake Interview</span>
+            </button>
           </div>
         </div>
 
@@ -155,7 +154,7 @@ export default function PatientDashboard() {
         </Card>
 
         {/* Dashboard Tabs */}
-        <div className="flex gap-2 border-b border-border-light pb-2 overflow-x-auto">
+        <div className="flex gap-2 border-b border-slate-200/80 pb-2 overflow-x-auto">
           {[
             { id: 'current', label: 'Current Consultation', icon: Stethoscope },
             { id: 'history', label: 'Previous Consultations', icon: Calendar },
@@ -166,13 +165,13 @@ export default function PatientDashboard() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold font-heading transition-all whitespace-nowrap cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold font-heading transition-all whitespace-nowrap cursor-pointer ${
                 activeTab === tab.id
-                  ? 'bg-primary-500 text-white shadow-sm'
-                  : 'text-text-secondary hover:text-text-primary hover:bg-surface-muted'
+                  ? 'bg-slate-950 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white bg-white/60 border border-slate-200/60'
               }`}
             >
-              <tab.icon className="w-4 h-4" />
+              <tab.icon className="size-4" />
               <span>{tab.label}</span>
             </button>
           ))}

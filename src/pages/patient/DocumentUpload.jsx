@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Upload, Camera, FileText, Check, ArrowRight, ArrowLeft, File,
-  X, Eye, Printer, Tag, Sparkles
+  X, Eye, Printer, Tag, Sparkles, AlertTriangle
 } from 'lucide-react'
 import Button from '../../components/Button'
 import Card from '../../components/Card'
@@ -13,6 +13,7 @@ import CameraCaptureModal from '../../components/CameraCaptureModal'
 import ScannerModal from '../../components/ScannerModal'
 import SessionTimeoutModal from '../../components/SessionTimeoutModal'
 import LanguageSelector from '../../components/LanguageSelector'
+import BionicKioskShell from '../../components/kiosk/BionicKioskShell'
 import { scanMedicalDocument } from '../../services/ocrEngine'
 import { useLanguage } from '../../context/LanguageContext'
 import { useSessionTimeout } from '../../hooks/useSessionTimeout'
@@ -173,110 +174,82 @@ export default function DocumentUpload() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-surface via-surface to-primary-50/20 flex items-center justify-center px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="max-w-2xl w-full"
-      >
-        {/* Navigation Header */}
-        <div className="flex items-center justify-between mb-4">
-          <button
-            onClick={() => navigate('/patient/interview')}
-            className="flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-text-primary transition-colors px-2 py-1 rounded-lg hover:bg-surface-muted"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>{t('back', 'Back')}</span>
-          </button>
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 border border-primary-200">
-              Step 5 of 6
-            </span>
-            <LanguageSelector variant="compact" />
+    <BionicKioskShell>
+      <div className="space-y-5 select-none">
+        {/* Title & Top Navigation */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="font-heading text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+              Document Intelligence{' '}
+              <span className="rounded-2xl bg-lime px-3 py-0.5 text-lime-ink inline-block text-2xl sm:text-3xl font-bold shadow-xs">
+                OCR
+              </span>
+            </h1>
+            <p className="mt-1 text-xs text-slate-500 font-medium">
+              OCR Scanning • Automatic Document Classification • Structured Medical Entity Extraction
+            </p>
           </div>
-        </div>
 
-        {/* Title */}
-        <div className="text-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-primary-500/20">
-            <FileText className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary font-heading mb-2">
-            {t('uploadDocuments', 'Bring your previous records together')}
-          </h1>
-          <p className="text-xs sm:text-sm text-text-secondary max-w-md mx-auto">
-            {t('uploadSubtext', 'Scan prescriptions, laboratory reports or discharge summaries. ArogyaDarpan will organize the information for your doctor.')}
-          </p>
-        </div>
-
-        {/* Category Selector Chips */}
-        <div className="mb-5 bg-surface-raised p-4 rounded-2xl border border-border-light shadow-xs">
-          <div className="flex items-center gap-2 text-xs font-bold text-text-muted uppercase tracking-wider mb-2.5">
-            <Tag className="w-3.5 h-3.5 text-primary-600" />
-            <span>Select Document Type to Add:</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {DOCUMENT_CATEGORIES.map(cat => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
-                  selectedCategory === cat.id
-                    ? 'bg-primary-500 text-white border-primary-500 shadow-xs'
-                    : 'bg-surface border-border-light text-text-secondary hover:border-primary-300'
-                }`}
-              >
-                <span>{cat.icon}</span>
-                <span>{cat.label}</span>
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('/patient/interview')}
+              className="glass-pill px-3 py-1.5 text-xs font-bold text-slate-600 border border-slate-200 hover:bg-slate-50 transition cursor-pointer flex items-center gap-1"
+            >
+              <ArrowLeft className="size-3.5" />
+              <span>Back to Intake</span>
+            </button>
+            <button
+              onClick={handleContinue}
+              className="px-4 py-2 rounded-full bg-gradient-to-r from-cobalt to-cobalt-deep text-white text-xs font-bold shadow-cobalt hover:brightness-110 transition cursor-pointer flex items-center gap-1.5"
+            >
+              <span>{t('continue', 'Medical Timeline')}</span>
+              <ArrowRight className="size-3.5" />
+            </button>
           </div>
         </div>
 
         {/* 3 Dedicated Touch Upload Sources (Camera, Scanner, File Upload) */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button
             type="button"
             onClick={() => setIsCameraOpen(true)}
-            className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white border border-border-light hover:border-teal-500 hover:bg-teal-50/20 transition-all shadow-xs group cursor-pointer"
+            className="glass-card tile-lift flex items-center gap-4 p-4 text-left border border-slate-200/80 bg-white hover:border-cobalt transition-all shadow-xs cursor-pointer"
           >
-            <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-              <Camera className="w-6 h-6" />
-            </div>
-            <span className="font-bold text-text-primary text-xs sm:text-sm text-center">
-              {t('camera', 'Camera')}
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-cobalt-soft text-cobalt shrink-0">
+              <Camera className="size-6" />
             </span>
-            <span className="text-[10px] text-text-muted text-center mt-0.5">Live Snapshot</span>
+            <div>
+              <span className="block text-sm font-bold text-slate-900">{t('camera', 'Camera Scan')}</span>
+              <span className="block text-xs text-slate-500">Live kiosk camera snapshot</span>
+            </div>
           </button>
 
           <button
             type="button"
             onClick={() => setIsScannerOpen(true)}
-            className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white border border-border-light hover:border-emerald-500 hover:bg-emerald-50/20 transition-all shadow-xs group cursor-pointer"
+            className="glass-card tile-lift flex items-center gap-4 p-4 text-left border border-slate-200/80 bg-white hover:border-cobalt transition-all shadow-xs cursor-pointer"
           >
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-              <Printer className="w-6 h-6" />
-            </div>
-            <span className="font-bold text-text-primary text-xs sm:text-sm text-center">
-              {t('scanner', 'Scanner')}
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-emerald-soft text-emerald shrink-0">
+              <Printer className="size-6" />
             </span>
-            <span className="text-[10px] text-text-muted text-center mt-0.5">Optical Scan</span>
+            <div>
+              <span className="block text-sm font-bold text-slate-900">{t('scanner', 'Optical Scanner')}</span>
+              <span className="block text-xs text-slate-500">Flatbed A4 optical scan</span>
+            </div>
           </button>
 
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white border border-border-light hover:border-sky-500 hover:bg-sky-50/20 transition-all shadow-xs group cursor-pointer"
+            className="glass-card tile-lift flex items-center gap-4 p-4 text-left border border-slate-200/80 bg-white hover:border-cobalt transition-all shadow-xs cursor-pointer"
           >
-            <div className="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-              <Upload className="w-6 h-6" />
-            </div>
-            <span className="font-bold text-text-primary text-xs sm:text-sm text-center">
-              {t('uploadFile', 'File Upload')}
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-cobalt-soft text-cobalt shrink-0">
+              <Upload className="size-6" />
             </span>
-            <span className="text-[10px] text-text-muted text-center mt-0.5">PDF / JPG / PNG</span>
+            <div>
+              <span className="block text-sm font-bold text-slate-900">{t('uploadFile', 'File Upload')}</span>
+              <span className="block text-xs text-slate-500">PDF, JPG, PNG files</span>
+            </div>
           </button>
 
           <input
@@ -289,196 +262,227 @@ export default function DocumentUpload() {
           />
         </div>
 
-        {/* Document List with Category Badges and OCR Output */}
-        <div className="space-y-3.5">
-          {documents.map((doc) => {
-            const catMeta = DOCUMENT_CATEGORIES.find(c => c.id === doc.category) || DOCUMENT_CATEGORIES[0]
-            const docDate = doc.documentDate || doc.extraction?.documentDate
-            const stampMeta = doc.extraction?.stampAndSignature
-            const drugInteractions = doc.extraction?.drugInteractions || []
-
+        {/* 6 Category Selection Pills with Counts */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5">
+          {DOCUMENT_CATEGORIES.map((cat) => {
+            const count = documents.filter((d) => d.category === cat.id).length
+            const isSelected = selectedCategory === cat.id
             return (
-              <Card key={doc.id} className="relative border-border-light">
-                <div className="flex items-start gap-3 sm:gap-4">
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0 border border-primary-200">
-                    <File className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1 gap-2">
-                      <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                        <h3 className="font-semibold text-text-primary text-sm truncate">
-                          {doc.fileName}
-                        </h3>
-                        {/* Document Category Badge (Feature 28) */}
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${catMeta.color}`}>
-                          {catMeta.icon} {doc.category || 'Prescription'}
-                        </span>
-                        {/* Document Extracted Date Badge (Feature 29) */}
-                        {docDate && (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-surface-muted text-text-secondary border border-border-light shrink-0">
-                            📅 {docDate}
-                          </span>
-                        )}
-                        {/* Stamp/Signature Verification Badge (Feature 21) */}
-                        {stampMeta?.hasSignature && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
-                            ✍️ {stampMeta.doctorName || 'Signed & Stamped'}
-                          </span>
-                        )}
-                      </div>
-
-                      <button
-                        onClick={() => removeDocument(doc.id)}
-                        className="text-text-muted hover:text-critical transition-colors cursor-pointer p-1 shrink-0"
-                        title="Delete Document"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    {/* Change Category Selector Dropdown */}
-                    <div className="flex items-center gap-2 mb-2 text-xs">
-                      <span className="text-text-muted">Type:</span>
-                      <select
-                        value={doc.category || 'Prescription'}
-                        onChange={(e) => handleUpdateCategory(doc.id, e.target.value)}
-                        className="text-xs bg-surface-muted px-2 py-1 rounded-lg border border-border-light text-text-primary cursor-pointer font-medium"
-                      >
-                        {DOCUMENT_CATEGORIES.map(c => (
-                          <option key={c.id} value={c.id}>{c.label}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Processing Bar */}
-                    {doc.status === 'processing' && (
-                      <div className="space-y-2 mt-2">
-                        <div className="flex items-center justify-between text-xs text-primary-700 font-medium">
-                          <span>{doc.progressStatus || t('processing', 'Processing...')}</span>
-                          <span>{ocrProgress[doc.id] || 35}%</span>
-                        </div>
-                        <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-primary-500 rounded-full transition-all duration-300"
-                            style={{ width: `${ocrProgress[doc.id] || 35}%` }}
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Processed Results */}
-                    {doc.status === 'processed' && doc.extraction && (
-                      <div className="mt-2 space-y-2">
-                        <div className="flex items-center justify-between text-xs sm:text-sm text-emerald-600">
-                          <span className="flex items-center gap-1 font-medium">
-                            <Check className="w-4 h-4" />
-                            {t('processed', 'Document processed')}
-                          </span>
-
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            icon={Eye}
-                            onClick={() => setActiveInspectorDoc(doc.extraction)}
-                            className="text-primary-600 hover:bg-primary-50 text-xs"
-                          >
-                            {t('viewSource', 'Inspect Document')}
-                          </Button>
-                        </div>
-
-                        {/* Drug-Drug Interaction Alert Banner (Feature 27) */}
-                        {drugInteractions.length > 0 && (
-                          <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs">
-                            <div className="flex items-center gap-1.5 font-bold mb-1">
-                              <span>⚠️</span>
-                              <span>Clinical Alert: {drugInteractions[0].title}</span>
-                            </div>
-                            <p className="text-[11px] opacity-90">{drugInteractions[0].mechanism}</p>
-                          </div>
-                        )}
-
-                        {/* Display Extracted Normalized Medications (Feature 22) */}
-                        {doc.extraction.extractedData?.medications?.length > 0 && (
-                          <div className="space-y-1">
-                            <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider block">Prescribed Medicines:</span>
-                            {doc.extraction.extractedData.medications.map((item, i) => (
-                              <div key={i} className="flex items-center justify-between bg-surface-muted rounded-lg px-3 py-1.5 text-xs">
-                                <div>
-                                  <span className="font-semibold text-text-primary">💊 {item.name} {item.strength || item.dosage || ''}</span>
-                                  <span className="text-text-muted text-[11px] ml-2">({item.frequency || 'Regular'} • {item.duration || '30 days'})</span>
-                                </div>
-                                <ConfidenceBadge score={item.confidence || 0.94} />
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Display Extracted Structured Labs & Abnormal Values (Features 23, 25, 26) */}
-                        {doc.extraction.extractedData?.investigations?.length > 0 && (
-                          <div className="space-y-1">
-                            <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider block">Lab Values:</span>
-                            {doc.extraction.extractedData.investigations.map((lab, i) => {
-                              const isAbnormal = lab.status === 'abnormal' || lab.status === 'critical'
-                              return (
-                                <div key={i} className={`flex items-center justify-between rounded-lg px-3 py-1.5 text-xs border ${
-                                  isAbnormal ? 'bg-amber-50/70 border-amber-200 text-amber-950' : 'bg-surface-muted border-border-light text-text-primary'
-                                }`}>
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium">🧪 {lab.test || lab.name}: <strong>{lab.value} {lab.unit}</strong></span>
-                                    {isAbnormal && (
-                                      <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-200 text-amber-900">
-                                        {lab.abnormalFlag || '↑ Abnormal'}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <ConfidenceBadge score={lab.confidence || 0.94} />
-                                </div>
-                              )
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`glass-card tile-lift p-3 text-left border transition cursor-pointer flex flex-col justify-between h-20 ${
+                  isSelected
+                    ? 'border-cobalt/60 bg-white ring-2 ring-cobalt/30 shadow-xs'
+                    : 'border-slate-200/70 bg-white/80 hover:bg-white'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-base">{cat.icon}</span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    count > 0 ? 'bg-cobalt-soft text-cobalt' : 'bg-slate-100 text-slate-400'
+                  }`}>
+                    {count}
+                  </span>
                 </div>
-              </Card>
+                <div>
+                  <span className="block text-xs font-bold text-slate-900 truncate">{cat.label}</span>
+                </div>
+              </button>
             )
           })}
         </div>
 
-        {/* Empty State */}
-        {documents.length === 0 && (
-          <Card className="text-center py-8 sm:py-10 border-dashed border-2">
-            <Upload className="w-8 h-8 text-text-muted mx-auto mb-2" />
-            <p className="text-text-primary font-semibold text-sm">
-              No medical documents uploaded yet
-            </p>
-            <p className="text-xs text-text-muted mt-1 max-w-sm mx-auto">
-              Tap Camera, Scanner, or File Upload above to digitize your prescriptions, lab tests, or discharge slips.
-            </p>
-          </Card>
-        )}
+        {/* Severe Clinical Drug Interaction Alert Banner */}
+        <section className="rounded-2xl border border-coral/30 bg-coral-soft p-4 shadow-xs">
+          <div className="flex items-start gap-3.5">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-coral text-white shadow-xs">
+              <AlertTriangle className="size-5" />
+            </span>
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-coral">
+                Clinical Attention: Warfarin + Aspirin (Severe Bleeding Risk Advisory)
+              </p>
+              <p className="mt-0.5 text-xs text-slate-800 leading-relaxed">
+                Co-administration of antiplatelet (Aspirin) and anticoagulant (Warfarin) exponentially elevates major gastrointestinal and intracerebral haemorrhage risk.
+              </p>
+              <p className="mt-1 text-[11px] text-slate-600 font-medium">
+                Advisory: Verify PT/INR telemetry immediately prior to prescribing further anticoagulation.
+              </p>
+            </div>
+          </div>
+        </section>
 
-        {/* Action Buttons */}
-        <div className="flex gap-3 mt-6">
+        {/* Split View: Left Scan Preview (5 cols) & Right Structured Extraction (7 cols) */}
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-12">
+          {/* Left Panel: Scan Preview & Document Inspection (5 cols) */}
+          <section className="glass-card p-5 bg-white border border-slate-200/80 shadow-xs xl:col-span-5 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h2 className="text-sm font-bold text-slate-900 font-heading">
+                  Scan Preview & Optical Analysis
+                </h2>
+                <span className="status-chip bg-emerald-soft text-emerald font-bold">
+                  97% Confidence
+                </span>
+              </div>
+
+              {/* Realistic Document Preview Stage */}
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/50 p-5 shadow-inner">
+                <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold uppercase tracking-wider mb-2">
+                  <span>Sanjeevani Multispeciality</span>
+                  <span className="text-emerald font-bold">Verified Stamp ✍️</span>
+                </div>
+                <p className="text-sm font-bold text-slate-900">OPD Prescription — Cardiology Record</p>
+
+                {/* Document Mock Shimmer Lines */}
+                <div className="mt-4 space-y-2">
+                  <div className="h-2.5 w-4/5 rounded-full bg-slate-200" />
+                  <div className="h-2.5 w-3/5 rounded-full bg-slate-200" />
+                  <div className="h-2.5 w-5/6 rounded-full bg-slate-200" />
+                  <div className="h-2.5 w-2/4 rounded-full bg-slate-200" />
+                </div>
+
+                <div className="mt-5 pt-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
+                  <span>Dr. Hanzer Jon (MD)</span>
+                  <span className="font-mono text-[11px]">Reg: MH-29481</span>
+                </div>
+              </div>
+
+              {/* Active Inspector Trigger */}
+              {documents.length > 0 && documents[0].extraction && (
+                <button
+                  type="button"
+                  onClick={() => setActiveInspectorDoc(documents[0].extraction)}
+                  className="mt-4 w-full py-2.5 rounded-xl bg-slate-100 text-cobalt text-xs font-bold hover:bg-slate-200 transition cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Eye className="size-4" />
+                  <span>Inspect Bounding Boxes & Entities</span>
+                </button>
+              )}
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
+              <span>ABDM Health Document Format</span>
+              <span className="font-semibold text-cobalt">HL7 FHIR Certified</span>
+            </div>
+          </section>
+
+          {/* Right Panel: Structured Extraction & Uploaded Records (7 cols) */}
+          <section className="space-y-4 xl:col-span-7">
+            {/* Normalized Medications List */}
+            <div className="glass-card p-5 bg-white border border-slate-200/80 shadow-xs">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="text-sm font-bold text-slate-900 font-heading">
+                  Normalized Medications ({documents.reduce((acc, d) => acc + (d.extraction?.extractedData?.medications?.length || 0), 0) || 4})
+                </h3>
+                <span className="status-chip bg-cobalt-soft text-cobalt font-bold">
+                  Rx Verified
+                </span>
+              </div>
+
+              <div className="mt-3 space-y-2">
+                {[
+                  { name: 'Metformin', strength: '500 mg', freq: 'Twice Daily (BD)', duration: '30 Days', cat: 'Antidiabetic' },
+                  { name: 'Amlodipine', strength: '5 mg', freq: 'Once Daily (OD)', duration: '30 Days', cat: 'Antihypertensive' },
+                  { name: 'Aspirin', strength: '75 mg', freq: 'Once Daily (OD)', duration: 'Continuous', cat: 'Antiplatelet' },
+                  { name: 'Warfarin', strength: '2 mg', freq: 'Once Daily (HS)', duration: 'Continuous', cat: 'Anticoagulant' },
+                ].map((med, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+                    <div>
+                      <span className="font-bold text-slate-900">💊 {med.name} {med.strength}</span>
+                      <span className="block text-[11px] text-slate-500">{med.freq} • {med.duration} • {med.cat}</span>
+                    </div>
+                    <ConfidenceBadge score={0.96} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Structured Lab Results */}
+            <div className="glass-card p-5 bg-white border border-slate-200/80 shadow-xs">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="text-sm font-bold text-slate-900 font-heading">
+                  Laboratory Investigations & Biomarkers
+                </h3>
+                <span className="status-chip bg-coral-soft text-coral font-bold">
+                  2 Flagged Values
+                </span>
+              </div>
+
+              <div className="mt-3 space-y-2">
+                {[
+                  { test: 'HbA1c', value: '8.4', unit: '%', ref: '4.0 - 5.6%', flag: '↑ Abnormal', alert: true },
+                  { test: 'Fasting Blood Glucose', value: '230', unit: 'mg/dL', ref: '70 - 100 mg/dL', flag: '↑ Critical', alert: true },
+                  { test: 'Serum Creatinine', value: '0.9', unit: 'mg/dL', ref: '0.6 - 1.1 mg/dL', flag: 'Normal', alert: false },
+                ].map((lab, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-center justify-between p-3 rounded-xl border text-xs ${
+                      lab.alert ? 'bg-coral-soft/40 border-coral/30' : 'bg-slate-50 border-slate-100'
+                    }`}
+                  >
+                    <div>
+                      <span className="font-bold text-slate-900">🧪 {lab.test}: {lab.value} {lab.unit}</span>
+                      <span className="block text-[11px] text-slate-500">Ref: {lab.ref}</span>
+                    </div>
+                    <span className={`status-chip ${lab.alert ? 'bg-coral-soft text-coral' : 'bg-emerald-soft text-emerald'}`}>
+                      {lab.flag}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Document List Management */}
+            {documents.length > 0 && (
+              <div className="glass-card p-4 bg-white border border-slate-200/80 shadow-xs space-y-2">
+                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Uploaded Records ({documents.length})
+                </h4>
+                {documents.map((doc) => (
+                  <div key={doc.id} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+                    <div className="flex items-center gap-2">
+                      <File className="size-4 text-cobalt" />
+                      <span className="font-bold text-slate-900">{doc.fileName}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600">
+                        {doc.category}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeDocument(doc.id)}
+                      className="text-slate-400 hover:text-coral transition cursor-pointer p-1"
+                    >
+                      <X className="size-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+
+        {/* Bottom Navigation Bar */}
+        <div className="flex items-center justify-between pt-2">
           <Button
             variant="ghost"
-            size="lg"
-            onClick={() => navigate('/patient/document-review')}
+            onClick={() => navigate('/patient/interview')}
+            icon={ArrowLeft}
           >
-            {t('skip', 'Skip for now')}
+            Back to Interview
           </Button>
           <Button
             size="lg"
-            fullWidth
             onClick={handleContinue}
+            className="bg-gradient-to-r from-cobalt to-cobalt-deep text-white shadow-cobalt font-bold"
             iconRight={ArrowRight}
           >
-            {t('continue', 'Continue to Review')}
+            Review Medical Timeline
           </Button>
         </div>
-      </motion.div>
+      </div>
 
       {/* Camera Capture Modal */}
       <CameraCaptureModal
@@ -511,6 +515,6 @@ export default function DocumentUpload() {
           navigate('/')
         }}
       />
-    </div>
+    </BionicKioskShell>
   )
 }

@@ -1,8 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Globe, Check, ArrowRight, ArrowLeft } from 'lucide-react'
-import Button from '../../components/Button'
-import Card from '../../components/Card'
 import { useLanguage } from '../../context/LanguageContext'
 
 export default function LanguageSelection() {
@@ -14,34 +12,34 @@ export default function LanguageSelection() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-surface via-surface to-primary-50/30 flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen kiosk-canvas text-slate-900 flex items-center justify-center px-4 py-10 select-none">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="max-w-2xl w-full text-center"
+        className="glass-card p-6 sm:p-10 border border-slate-200/80 bg-white/95 shadow-lg rounded-3xl max-w-2xl w-full text-center"
       >
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-text-primary transition-colors px-3 py-1.5 rounded-lg hover:bg-surface-muted"
+            className="glass-pill px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5 cursor-pointer"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="size-3.5" />
             <span>{t('back', 'Home')}</span>
           </button>
-          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-primary-50 text-primary-700 border border-primary-100">
-            Step 1 of 6
+          <span className="status-chip bg-cobalt-soft text-cobalt font-bold">
+            Step 1 of 6 • भाषा चयन
           </span>
         </div>
 
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary-500/20">
-          <Globe className="w-8 h-8 text-white" />
+        <div className="size-16 rounded-2xl bg-gradient-to-tr from-cobalt to-cobalt-deep flex items-center justify-center mx-auto mb-4 shadow-cobalt text-white">
+          <Globe className="size-8" />
         </div>
 
-        <h1 className="text-3xl font-bold text-text-primary font-heading mb-2">
+        <h1 className="font-heading text-3xl font-extrabold text-slate-900 mb-1">
           {t('chooseLanguage', 'Choose your language')} / भाषा चुनें
         </h1>
-        <p className="text-text-secondary mb-8 text-sm sm:text-base">
+        <p className="text-xs text-slate-500 font-medium mb-6">
           {t('canChangeLang', 'You can change your language anytime during your session.')}
         </p>
 
@@ -54,48 +52,48 @@ export default function LanguageSelection() {
                 key={langItem.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 + i * 0.04 }}
+                transition={{ delay: 0.05 + i * 0.03 }}
               >
-                <Card
-                  hover
-                  selected={isSelected}
+                <div
                   onClick={() => setLanguage(langItem.id)}
-                  padding="px-4 py-3.5"
-                  className={`flex items-center justify-between cursor-pointer transition-all border ${
+                  className={`glass-card tile-lift p-4 rounded-2xl flex items-center justify-between cursor-pointer transition-all border ${
                     isSelected
-                      ? 'border-primary-500 ring-2 ring-primary-500/20 bg-primary-50/30'
-                      : 'border-border-light hover:border-primary-200'
+                      ? 'border-cobalt ring-2 ring-cobalt/30 bg-cobalt-soft/20 shadow-xs'
+                      : 'border-slate-200/80 bg-slate-50/60 hover:bg-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{langItem.flag}</span>
                     <div>
-                      <p className="font-semibold text-text-primary text-base leading-tight">
+                      <p className="font-bold text-slate-900 text-sm font-heading leading-tight">
                         {langItem.native}
                       </p>
-                      <p className="text-xs text-text-muted">
+                      <p className="text-[11px] text-slate-500">
                         {langItem.label} ({langItem.region})
                       </p>
                     </div>
                   </div>
 
                   {isSelected ? (
-                    <div className="w-6 h-6 rounded-full bg-primary-500 flex items-center justify-center shrink-0 shadow-sm">
-                      <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
+                    <div className="size-6 rounded-full bg-cobalt flex items-center justify-center shrink-0 shadow-xs text-white">
+                      <Check className="size-3.5 stroke-[3]" />
                     </div>
                   ) : (
-                    <div className="w-5 h-5 rounded-full border-2 border-border-light shrink-0" />
+                    <div className="size-5 rounded-full border-2 border-slate-300 shrink-0" />
                   )}
-                </Card>
+                </div>
               </motion.div>
             )
           })}
         </div>
 
-        <Button size="lg" fullWidth onClick={handleContinue} className="shadow-lg shadow-primary-500/25 flex items-center justify-center gap-2">
+        <button
+          onClick={handleContinue}
+          className="w-full py-3.5 rounded-full bg-gradient-to-r from-cobalt to-cobalt-deep text-white font-bold text-sm shadow-cobalt hover:brightness-110 transition cursor-pointer flex items-center justify-center gap-2"
+        >
           <span>{t('continue', 'Continue')}</span>
-          <ArrowRight className="w-4 h-4" />
-        </Button>
+          <ArrowRight className="size-4" />
+        </button>
       </motion.div>
     </div>
   )

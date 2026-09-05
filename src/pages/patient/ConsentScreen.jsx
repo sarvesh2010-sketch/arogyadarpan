@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ShieldCheck, Volume2, VolumeX, Lock, FileCheck, ArrowLeft, ArrowRight } from 'lucide-react'
-import Button from '../../components/Button'
+import { ShieldCheck, Volume2, VolumeX, Lock, FileCheck, ArrowLeft, ArrowRight, Check } from 'lucide-react'
 import LanguageSelector from '../../components/LanguageSelector'
 import { useLanguage } from '../../context/LanguageContext'
 
@@ -58,7 +57,7 @@ export default function ConsentScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-surface via-surface to-primary-50/20 flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen kiosk-canvas text-slate-900 flex items-center justify-center px-4 py-8 select-none">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -68,68 +67,70 @@ export default function ConsentScreen() {
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() => navigate('/patient/language')}
-            className="flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-text-primary transition-colors px-2 py-1 rounded-lg hover:bg-surface-muted"
+            className="glass-pill px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5 cursor-pointer"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="size-3.5" />
             <span>{t('back', 'Back')}</span>
           </button>
           <LanguageSelector variant="compact" />
         </div>
 
         <div className="text-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-primary-500/20">
-            <ShieldCheck className="w-8 h-8 text-white" />
+          <div className="size-16 rounded-2xl bg-gradient-to-tr from-cobalt to-cobalt-deep flex items-center justify-center mx-auto mb-3 shadow-cobalt text-white">
+            <ShieldCheck className="size-8" />
           </div>
-          <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200 mb-2">
-            <Lock className="w-3.5 h-3.5" /> DPDP Act 2023 & ABDM Consent Compliant
+          <span className="status-chip bg-emerald-soft text-emerald font-bold mb-2">
+            <Lock className="size-3.5" /> DPDP Act 2023 & ABDM Consent Compliant
           </span>
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary font-heading mb-1.5">
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-slate-900 mb-1">
             {t('consentTitle', 'Consent & Privacy Framework')}
           </h1>
-          <p className="text-xs sm:text-sm text-text-secondary">
+          <p className="text-xs text-slate-500 font-medium">
             {t('consentSubtitle', 'Your health data is protected under national digital health standards')}
           </p>
         </div>
 
-        <div className="bg-surface-raised rounded-3xl border border-border-light shadow-card p-6 sm:p-7 mb-6 space-y-5">
-          <p className="text-text-primary text-sm sm:text-base leading-relaxed">
+        <div className="glass-card rounded-3xl border border-slate-200/80 bg-white/95 shadow-md p-6 sm:p-7 mb-6 space-y-5">
+          <p className="text-slate-700 text-sm leading-relaxed font-medium">
             {t('consentText')}
           </p>
 
           {/* Granular Consent Checklist */}
-          <div className="space-y-3 bg-surface-muted p-4 rounded-2xl border border-border-light text-xs sm:text-sm">
+          <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200/70 text-xs">
             <label className="flex items-center justify-between cursor-pointer">
-              <span className="font-semibold text-text-primary">{t('consent1')}</span>
+              <span className="font-bold text-slate-800">{t('consent1')}</span>
               <input
                 type="checkbox"
                 checked={consentOptions.historyCollection}
                 onChange={(e) => setConsentOptions(prev => ({ ...prev, historyCollection: e.target.checked }))}
-                className="w-4 h-4 accent-primary-500 rounded cursor-pointer"
+                className="size-4 accent-cobalt rounded cursor-pointer"
               />
             </label>
             <label className="flex items-center justify-between cursor-pointer">
-              <span className="font-semibold text-text-primary">{t('consent2')}</span>
+              <span className="font-bold text-slate-800">{t('consent2')}</span>
               <input
                 type="checkbox"
                 checked={consentOptions.documentOCR}
                 onChange={(e) => setConsentOptions(prev => ({ ...prev, documentOCR: e.target.checked }))}
-                className="w-4 h-4 accent-primary-500 rounded cursor-pointer"
+                className="size-4 accent-cobalt rounded cursor-pointer"
               />
             </label>
             <label className="flex items-center justify-between cursor-pointer">
-              <span className="font-semibold text-text-primary">{t('consent3')}</span>
+              <span className="font-bold text-slate-800">{t('consent3')}</span>
               <input
                 type="checkbox"
                 checked={consentOptions.abdmSync}
                 onChange={(e) => setConsentOptions(prev => ({ ...prev, abdmSync: e.target.checked }))}
-                className="w-4 h-4 accent-primary-500 rounded cursor-pointer"
+                className="size-4 accent-cobalt rounded cursor-pointer"
               />
             </label>
           </div>
 
-          <div className="bg-primary-50/80 rounded-xl p-3.5 border border-primary-200 text-xs text-primary-900 space-y-1">
-            <p className="font-bold flex items-center gap-1.5"><FileCheck className="w-4 h-4 text-primary-600" /> Data Security Guarantee:</p>
-            <p>• {t('consentDetail')}</p>
+          <div className="bg-cobalt-soft/50 rounded-xl p-3.5 border border-cobalt/20 text-xs text-cobalt-deep space-y-1">
+            <p className="font-bold flex items-center gap-1.5">
+              <FileCheck className="size-4 text-cobalt" /> Data Security Guarantee:
+            </p>
+            <p className="font-medium">• {t('consentDetail')}</p>
           </div>
 
           <label className="flex items-start gap-3 cursor-pointer group pt-1">
@@ -137,34 +138,40 @@ export default function ConsentScreen() {
               type="checkbox"
               checked={agreed}
               onChange={(e) => setAgreed(e.target.checked)}
-              className="mt-0.5 w-5 h-5 rounded border-gray-300 text-primary-500 focus:ring-primary-500 cursor-pointer accent-primary-500"
+              className="mt-0.5 size-5 rounded border-slate-300 text-cobalt focus:ring-cobalt cursor-pointer accent-cobalt"
             />
-            <span className="text-text-primary font-bold text-xs sm:text-sm group-hover:text-primary-600 transition-colors">
+            <span className="text-slate-900 font-bold text-xs sm:text-sm group-hover:text-cobalt transition-colors">
               {t('consentAgree', 'I understand and agree to continue')}
             </span>
           </label>
         </div>
 
         <div className="flex gap-3">
-          <Button
-            variant="secondary"
-            size="lg"
-            icon={isSpeaking ? VolumeX : Volume2}
+          <button
+            type="button"
             onClick={handleReadAloud}
-            className={`flex-shrink-0 ${isSpeaking ? 'bg-primary-100 border-primary-400 text-primary-800' : ''}`}
+            className={`glass-pill px-4 py-3 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
+              isSpeaking
+                ? 'bg-cobalt-soft text-cobalt border border-cobalt/40 animate-pulse'
+                : 'text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
           >
-            {isSpeaking ? t('stopAudio', 'Stop') : t('readAloud', 'Read aloud')}
-          </Button>
-          <Button
-            size="lg"
-            fullWidth
+            {isSpeaking ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+            <span>{isSpeaking ? t('stopAudio', 'Stop') : t('readAloud', 'Read aloud')}</span>
+          </button>
+
+          <button
             disabled={!agreed}
             onClick={handleContinue}
-            className="flex items-center justify-center gap-2"
+            className={`flex-1 py-3 rounded-full text-xs font-bold shadow-xs transition flex items-center justify-center gap-2 cursor-pointer ${
+              agreed
+                ? 'bg-gradient-to-r from-cobalt to-cobalt-deep text-white shadow-cobalt hover:brightness-110'
+                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+            }`}
           >
             <span>{t('continue', 'Continue')}</span>
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+            <ArrowRight className="size-4" />
+          </button>
         </div>
       </motion.div>
     </div>
