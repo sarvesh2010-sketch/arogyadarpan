@@ -179,9 +179,9 @@ export default function DocumentUpload() {
         {/* Title & Top Navigation */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="font-heading text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+            <h1 className="font-heading text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">
               Document Intelligence{' '}
-              <span className="rounded-2xl bg-lime px-3 py-0.5 text-lime-ink inline-block text-2xl sm:text-3xl font-bold shadow-xs">
+              <span className="rounded-xl sm:rounded-2xl bg-lime px-2.5 sm:px-3 py-0.5 text-lime-ink inline-block text-xl sm:text-2xl md:text-3xl font-bold shadow-xs">
                 OCR
               </span>
             </h1>

@@ -105,12 +105,12 @@ export default function ScannerModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm overflow-x-hidden overflow-y-auto w-full max-w-[100vw]">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="bg-surface-raised rounded-3xl overflow-hidden max-w-xl w-full border border-border-light shadow-2xl flex flex-col"
+          className="bg-surface-raised rounded-2xl sm:rounded-3xl overflow-hidden max-w-xl w-full max-w-[calc(100vw-1.5rem)] border border-border-light shadow-2xl flex flex-col my-auto"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-border-light bg-surface">

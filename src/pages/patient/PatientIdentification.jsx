@@ -182,7 +182,7 @@ export default function PatientIdentification() {
   const canContinueRegistration = form.name.trim() && form.age && form.gender && form.phone.length === 10
 
   return (
-    <div className="min-h-screen kiosk-canvas text-slate-900 flex items-center justify-center px-4 py-8 select-none">
+    <div className="min-h-screen kiosk-canvas text-slate-900 flex flex-col justify-start sm:justify-center items-center px-4 py-6 sm:py-10 pb-28 overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

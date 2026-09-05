@@ -178,10 +178,10 @@ export default function DocumentReview() {
         </div>
 
         {/* Bottom Actions */}
-        <div className="flex items-center justify-between pt-2">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 pb-6">
           <button
             onClick={() => navigate('/patient/documents')}
-            className="glass-pill px-5 py-2.5 text-xs font-bold text-slate-600 border border-slate-200 hover:bg-slate-50 transition cursor-pointer flex items-center gap-2"
+            className="w-full sm:w-auto glass-pill px-4 py-2.5 text-xs font-bold text-slate-600 border border-slate-200 hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-2"
           >
             <ArrowLeft className="size-4" />
             <span>Back to Uploads</span>
@@ -189,7 +189,7 @@ export default function DocumentReview() {
 
           <button
             onClick={() => navigate('/patient/confirmation')}
-            className="px-6 py-3 rounded-full bg-gradient-to-r from-cobalt to-cobalt-deep text-white text-sm font-bold shadow-cobalt hover:brightness-110 transition cursor-pointer flex items-center gap-2"
+            className="w-full sm:w-auto px-5 py-3 rounded-xl sm:rounded-full bg-gradient-to-r from-cobalt to-cobalt-deep text-white text-xs sm:text-sm font-bold shadow-cobalt hover:brightness-110 transition cursor-pointer flex items-center justify-center gap-2 text-center"
           >
             <span>Proceed to Confirmation & Doctor Triage</span>
             <ArrowRight className="size-4" />

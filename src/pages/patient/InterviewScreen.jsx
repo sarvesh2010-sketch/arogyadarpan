@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowRight, ArrowLeft, Heart, MessageCircle, Volume2, VolumeX, Sun,
   LogOut, FormInput, ListFilter, CheckSquare, Square, Calendar, Hash, Sparkles,
-  Stethoscope, Leaf, Activity, Zap
+  Stethoscope, Leaf, Activity, Zap, RefreshCw
 } from 'lucide-react'
 import Button from '../../components/Button'
 import Card from '../../components/Card'
@@ -225,15 +225,13 @@ export default function InterviewScreen() {
     setTimeout(nextQuestion, 500)
   }
 
-  // Safe navigation on completion
+  // Auto-save responses to localStorage whenever updated
   useEffect(() => {
-    if (isComplete) {
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel()
+    if (responses.length > 0) {
       localStorage.setItem('arogya_responses', JSON.stringify(responses))
       localStorage.setItem('arogya_triage', JSON.stringify(triageData))
-      navigate('/patient/documents')
     }
-  }, [isComplete, responses, triageData, navigate])
+  }, [responses, triageData])
 
   const handleEndSession = () => {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel()
@@ -241,7 +239,116 @@ export default function InterviewScreen() {
     navigate('/')
   }
 
-  if (isComplete || !currentQuestion) return null
+  // If intake is complete, render an interactive summary rather than a blank or redirect screen
+  if (isComplete) {
+    const chiefVal = responses.find(r => r.questionId === 'chief_complaint')?.structuredValue || 'General Consultation'
+    return (
+      <BionicKioskShell
+        activeTrack={mode === 'ayush' ? 'ayush' : 'modern'}
+        onTrackChange={(newTrack) => setMode(newTrack === 'ayush' ? 'ayush' : 'allopathic')}
+      >
+        <div className="max-w-2xl mx-auto py-6 sm:py-10 text-center select-none space-y-6">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="size-20 rounded-3xl bg-gradient-to-tr from-emerald to-teal-700 flex items-center justify-center mx-auto text-white shadow-lg shadow-emerald-600/25"
+          >
+            <CheckSquare className="size-10" />
+          </motion.div>
+
+          <div>
+            <span className="status-chip bg-emerald-soft text-emerald font-bold mb-2">
+              Clinical Intake Completed • 100%
+            </span>
+            <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
+              Clinical Intake Responses Saved
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-md mx-auto mt-1">
+              Your symptoms and clinical history have been synthesized by AI and prepared for your physician.
+            </p>
+          </div>
+
+          {/* Quick Summary Card */}
+          <div className="glass-card p-4 sm:p-6 bg-white border border-slate-200/80 shadow-xs rounded-2xl text-left space-y-3">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Intake Summary
+              </span>
+              <span className="text-xs font-bold text-cobalt font-mono">
+                {responses.length} Question{responses.length !== 1 ? 's' : ''} Answered
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="text-slate-400 block text-[10px] font-bold uppercase">Chief Complaint</span>
+                <span className="font-bold text-slate-900 text-sm mt-0.5 block capitalize">
+                  {String(chiefVal).replace(/_/g, ' ')}
+                </span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="text-slate-400 block text-[10px] font-bold uppercase">Triage Status</span>
+                <span className="font-bold text-emerald text-sm mt-0.5 block">
+                  {triageData?.priority === 'critical' ? '⚠️ Priority Review Required' : '✓ Standard Triage Ready'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Action CTAs */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                resetInterview()
+              }}
+              className="btn-bionic-outline w-full sm:w-auto px-6 py-3.5 rounded-full text-xs sm:text-sm font-bold shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <RefreshCw className="size-4" />
+              <span>Retake / Edit Intake</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/patient/documents')}
+              className="btn-bionic w-full sm:w-auto px-7 py-3.5 rounded-full text-white text-xs sm:text-sm font-bold shadow-cobalt flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>Continue to OCR Scanner</span>
+              <ArrowRight className="size-4" />
+            </button>
+          </div>
+        </div>
+      </BionicKioskShell>
+    )
+  }
+
+  // Graceful fallback if no question is active
+  if (!currentQuestion) {
+    return (
+      <BionicKioskShell
+        activeTrack={mode === 'ayush' ? 'ayush' : 'modern'}
+        onTrackChange={(newTrack) => setMode(newTrack === 'ayush' ? 'ayush' : 'allopathic')}
+      >
+        <div className="max-w-md mx-auto py-12 text-center select-none space-y-4">
+          <div className="size-16 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mx-auto">
+            <Activity className="size-8" />
+          </div>
+          <h2 className="font-heading font-bold text-lg text-slate-900">
+            Intake Session
+          </h2>
+          <p className="text-xs text-slate-500">
+            Ready to start your clinical intake interview.
+          </p>
+          <button
+            onClick={() => resetInterview()}
+            className="btn-bionic px-6 py-3 rounded-full text-white text-xs font-bold shadow-cobalt mx-auto"
+          >
+            Start Intake Questionnaire
+          </button>
+        </div>
+      </BionicKioskShell>
+    )
+  }
 
   const handleSelectOption = (value) => {
     if (currentQuestion.type === 'multi_select') {
@@ -296,9 +403,9 @@ export default function InterviewScreen() {
             {/* Top Title & Controls */}
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div>
-                <h1 className="font-heading text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+                <h1 className="font-heading text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">
                   Clinical Intake{' '}
-                  <span className="rounded-2xl bg-lime px-3 py-0.5 text-lime-ink inline-block text-2xl sm:text-3xl font-bold shadow-xs">
+                  <span className="rounded-xl sm:rounded-2xl bg-lime px-2 sm:px-3 py-0.5 text-lime-ink inline-block text-lg sm:text-2xl md:text-3xl font-bold shadow-xs">
                     Interview
                   </span>
                 </h1>
@@ -338,17 +445,23 @@ export default function InterviewScreen() {
               </div>
             ) : (
               /* STEP QUESTION CARD */
-              <div className="glass-card p-5 sm:p-6 bg-white border border-slate-200/80 shadow-xs">
+              <motion.div
+                key={currentQuestion.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.22 }}
+                className="glass-card p-3 sm:p-5 md:p-6 bg-white border border-slate-200/80 shadow-xs rounded-2xl"
+              >
                 {/* Section Badge & Question Counter */}
                 <div className="flex items-center justify-between mb-3">
-                  <span className="status-chip bg-cobalt-soft text-cobalt font-bold text-[11px]">
-                    {currentQuestion.category || currentQuestion.section || 'QUESTION'}
+                  <span className="status-chip bg-cobalt-soft text-cobalt font-bold text-[10px] sm:text-[11px]">
+                    {(currentQuestion.category || currentQuestion.section || 'QUESTION').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                   </span>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-slate-400">
                       {currentIndex + 1} / {totalQuestions}
                     </span>
-                    <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="w-16 sm:w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-cobalt rounded-full transition-all duration-300"
                         style={{ width: `${((currentIndex + 1) / totalQuestions) * 100}%` }}
@@ -358,7 +471,7 @@ export default function InterviewScreen() {
                 </div>
 
                 {/* Question Prompt */}
-                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading mb-1 leading-snug">
+                <h2 className="text-base sm:text-xl md:text-2xl font-bold text-slate-900 font-heading mb-1 leading-snug">
                   {questionText}
                 </h2>
                 {(currentQuestion.hindi || currentQuestion.questionHi) && (
@@ -393,7 +506,7 @@ export default function InterviewScreen() {
                                 : 'cough'
                             )
                           }
-                          className="glass-card tile-lift p-3.5 text-left border border-slate-200/80 bg-white hover:border-cobalt transition-all cursor-pointer shadow-xs flex flex-col justify-between h-28"
+                          className="glass-card tile-lift p-3 sm:p-3.5 text-left border border-slate-200/80 bg-white hover:border-cobalt transition-all cursor-pointer shadow-xs flex flex-col justify-between h-24 sm:h-28"
                         >
                           <span className="flex size-9 items-center justify-center rounded-xl bg-cobalt-soft text-cobalt">
                             <Activity className="size-4" />
@@ -452,10 +565,10 @@ export default function InterviewScreen() {
                     <div className="flex justify-end pt-1">
                       <Button
                         size="md"
-                        onClick={() => handleSelectOption(String(numberInput || 5))}
+                        onClick={() => handleSelectOption(String(Math.min(10, Math.max(1, parseInt(numberInput, 10) || 5))))}
                         className="bg-cobalt text-white shadow-cobalt font-bold text-xs"
                       >
-                        Confirm Severity ({numberInput || 5}/10)
+                        Confirm Severity ({Math.min(10, Math.max(1, parseInt(numberInput, 10) || 5))}/10)
                       </Button>
                     </div>
                   </div>
@@ -463,18 +576,18 @@ export default function InterviewScreen() {
 
                 {/* 3. YES / NO BUTTONS */}
                 {currentQuestion.type === 'yes_no' && (
-                  <div className="flex gap-4 justify-center py-4">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center py-3 sm:py-4">
                     <button
                       type="button"
                       onClick={() => handleSelectOption('yes')}
-                      className="glass-card tile-lift flex-1 max-w-[180px] py-4 rounded-2xl text-center font-bold text-base bg-emerald-soft text-emerald border border-emerald/30 hover:bg-emerald hover:text-white transition cursor-pointer"
+                      className="glass-card tile-lift w-full sm:flex-1 sm:max-w-[180px] py-3.5 sm:py-4 rounded-2xl text-center font-bold text-base bg-emerald-soft text-emerald border border-emerald/30 hover:bg-emerald hover:text-white transition cursor-pointer"
                     >
                       {t('yes', 'Yes / हाँ')}
                     </button>
                     <button
                       type="button"
                       onClick={() => handleSelectOption('no')}
-                      className="glass-card tile-lift flex-1 max-w-[180px] py-4 rounded-2xl text-center font-bold text-base bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-800 hover:text-white transition cursor-pointer"
+                      className="glass-card tile-lift w-full sm:flex-1 sm:max-w-[180px] py-3.5 sm:py-4 rounded-2xl text-center font-bold text-base bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-800 hover:text-white transition cursor-pointer"
                     >
                       {t('no', 'No / नहीं')}
                     </button>
@@ -592,7 +705,7 @@ export default function InterviewScreen() {
                 )}
 
                 {/* Controls Bar at bottom of card */}
-                <div className="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                <div className="mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
                   <div className="flex items-center gap-2">
                     <Button
                       variant="ghost"
@@ -626,7 +739,7 @@ export default function InterviewScreen() {
                     </button>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             )}
           </div>
         </section>

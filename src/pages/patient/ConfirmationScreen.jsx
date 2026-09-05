@@ -26,7 +26,7 @@ export default function ConfirmationScreen() {
   const hasAllergyConflict = items.some(item => item.label.toLowerCase().includes('allergy') && item.status === 'needs_review')
 
   return (
-    <div className="min-h-screen kiosk-canvas text-slate-900 px-4 sm:px-6 py-8 sm:py-12 select-none">
+    <div className="min-h-screen kiosk-canvas text-slate-900 px-4 sm:px-6 py-6 sm:py-12 pb-28 overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

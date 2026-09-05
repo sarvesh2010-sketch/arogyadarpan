@@ -72,9 +72,9 @@ function KioskContent() {
         <div>
           {/* Header Title with Glowing Lime Badge */}
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl font-extrabold leading-[1.05] tracking-tight text-slate-900">
+            <h1 className="font-heading text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.05] tracking-tight text-slate-900">
               Overview{' '}
-              <span className="rounded-2xl bg-lime px-3.5 py-1 text-lime-ink inline-block shadow-xs">
+              <span className="rounded-xl sm:rounded-2xl bg-lime px-2.5 sm:px-3.5 py-0.5 sm:py-1 text-lime-ink inline-block shadow-xs text-xl sm:text-4xl md:text-5xl">
                 Conditions
               </span>
             </h1>
@@ -107,18 +107,18 @@ function KioskContent() {
           </p>
 
           {/* 3D Anatomical Heart Hero Stage */}
-          <div className="relative mt-3 sm:mt-5 flex h-[380px] sm:h-[420px] items-center justify-center overflow-visible">
+          <div className="relative mt-3 sm:mt-5 flex h-[260px] sm:h-[380px] md:h-[420px] items-center justify-center overflow-visible">
             {/* Concentric Radar Rings & Glowing Auras */}
-            <div className="absolute size-[340px] sm:size-[380px] rounded-full border border-cobalt/15" />
-            <div className="absolute size-[260px] sm:size-[300px] rounded-full border border-cobalt/20 border-dashed" />
-            <div className="absolute size-[300px] sm:size-[340px] rounded-full bg-white/60 blur-[2px]" />
-            <div className="absolute size-[220px] sm:size-[260px] rounded-full bg-cobalt-soft blur-3xl pointer-events-none" />
+            <div className="absolute size-[240px] sm:size-[340px] md:size-[380px] rounded-full border border-cobalt/15" />
+            <div className="absolute size-[180px] sm:size-[260px] md:size-[300px] rounded-full border border-cobalt/20 border-dashed" />
+            <div className="absolute size-[210px] sm:size-[300px] md:size-[340px] rounded-full bg-white/60 blur-[2px]" />
+            <div className="absolute size-[160px] sm:size-[220px] md:size-[260px] rounded-full bg-cobalt-soft blur-3xl pointer-events-none" />
 
             {/* Levitating 3D Heart Image */}
             <img
               src={heartOrgan}
               alt="Interactive 3D anatomical heart model with telemetry hotspots"
-              className="relative h-[320px] sm:h-[380px] w-auto animate-float-slow drop-shadow-2xl z-10 transition-transform duration-500 hover:scale-105"
+              className="relative h-[220px] sm:h-[320px] md:h-[380px] w-auto animate-float-slow drop-shadow-2xl z-10 transition-transform duration-500 hover:scale-105"
             />
 
             {/* Pulsating Radar Hotspots */}
@@ -137,7 +137,7 @@ function KioskContent() {
             ))}
 
             {/* Floating Glass ECG Telemetry Card (120 bpm) */}
-            <div className="glass-card absolute bottom-2 left-0 sm:left-4 w-52 sm:w-56 p-4 shadow-float bg-white/95 z-30 border border-slate-200/90 rounded-2xl">
+            <div className="glass-card absolute bottom-1 left-0 sm:left-4 w-44 sm:w-56 p-3 sm:p-4 shadow-float bg-white/95 z-30 border border-slate-200/90 rounded-2xl">
               <div className="flex items-center gap-2">
                 <span className="flex size-7 items-center justify-center rounded-full bg-cobalt-soft text-cobalt">
                   <Heart className="size-3.5 fill-current" />
@@ -163,9 +163,9 @@ function KioskContent() {
         </div>
 
         {/* ── Bionic Consultation Command Card (Matching User Image 1) ── */}
-        <div className="glass-card mt-4 p-5 rounded-[2rem] bg-white border border-slate-200/90 shadow-glass flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="glass-card mt-3 sm:mt-4 p-3 sm:p-5 rounded-2xl sm:rounded-[2rem] bg-white border border-slate-200/90 shadow-glass flex flex-col gap-3 sm:gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
               <span className={`size-3 rounded-full ${isAuthed ? 'bg-emerald animate-ping' : 'bg-emerald-300'}`} />
               <span className="text-xs font-black uppercase tracking-wider text-slate-800">
                 {isAuthed ? `ACTIVE: ${patient.name}` : 'CHECK-IN REQUIRED'}
@@ -182,10 +182,10 @@ function KioskContent() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={handleStartConsultation}
-              className="btn-bionic px-6 py-3 rounded-full text-white font-bold text-xs shadow-cobalt flex items-center gap-2 cursor-pointer"
+              className="btn-bionic w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-white font-bold text-xs shadow-cobalt flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>{isAuthed ? 'Start AI Clinical Intake' : 'Check In / Register Now'}</span>
               <ArrowRight className="size-4" />
@@ -240,7 +240,7 @@ function KioskContent() {
                 <button
                   key={organ.id}
                   onClick={() => setActiveOrganId(organ.id)}
-                  className={`glass-card tile-lift flex h-36 w-38 sm:w-42 shrink-0 flex-col justify-between p-4 text-left cursor-pointer transition rounded-3xl ${
+                  className={`glass-card tile-lift flex h-32 sm:h-36 w-32 sm:w-38 md:w-42 shrink-0 flex-col justify-between p-3 sm:p-4 text-left cursor-pointer transition rounded-2xl sm:rounded-3xl ${
                     active
                       ? 'border-emerald-600 shadow-cobalt ring-2 ring-emerald-500/30 bg-white'
                       : 'border-slate-200/80 bg-white hover:border-slate-300'
@@ -386,7 +386,7 @@ function KioskContent() {
             {/* Primary Action Button */}
             <button
               onClick={handleStartConsultation}
-              className="btn-bionic mt-3 flex w-full items-center justify-between rounded-full px-5 py-3.5 text-xs sm:text-sm font-bold text-white shadow-cobalt transition hover:brightness-110 hover:shadow-float active:scale-98 cursor-pointer"
+              className="btn-bionic mt-3 flex w-full items-center justify-between rounded-full px-4 sm:px-5 py-3 sm:py-3.5 text-xs sm:text-sm font-bold text-white shadow-cobalt transition hover:brightness-110 hover:shadow-float active:scale-98 cursor-pointer"
             >
               <span>{isAuthed ? 'Begin Clinical Consultation' : 'Check In & Consult Now'}</span>
               <ArrowRight className="size-4" />

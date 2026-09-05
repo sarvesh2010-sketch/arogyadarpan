@@ -625,10 +625,12 @@ export function buildDynamicConfirmationItems() {
     items.push({ label: 'Started', value: formatClinicalValue(onset.structuredValue || onset.originalResponse), status: 'confirmed' })
   }
 
-  // Severity
+  // Severity (strictly clamped 1 - 10)
   const severity = responses.find(r => r.questionId.includes('severity'))
   if (severity) {
-    items.push({ label: 'Severity Score', value: `${severity.structuredValue || 5} / 10`, status: 'confirmed' })
+    const rawNum = parseInt(severity.structuredValue, 10)
+    const clamped = isNaN(rawNum) ? 5 : Math.min(10, Math.max(1, rawNum))
+    items.push({ label: 'Severity Score', value: `${clamped} / 10`, status: 'confirmed' })
   }
 
   // Past Medical Conditions

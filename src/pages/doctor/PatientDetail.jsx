@@ -22,6 +22,7 @@ import DifferentialDiagnosisWidget from '../../components/DifferentialDiagnosisW
 import { getDemoPatient } from '../../data/demoPatients'
 import { prepareFHIRBundle } from '../../services/abdmService'
 import { generateDifferentialDiagnosis } from '../../services/differentialEngine'
+import { BottomNav } from '../../components/kiosk/BionicKioskShell'
 
 const tabs = [
   { id: 'summary', label: 'Structured Summary', icon: ClipboardList },
@@ -213,10 +214,10 @@ export default function PatientDetail() {
   const activeAllergies = summary.allergies ? (summary.allergies.historicalRecord ? [summary.allergies.historicalRecord] : ['Penicillin']) : []
 
   return (
-    <div className="min-h-screen kiosk-canvas text-slate-900 pb-12 select-none">
+    <div className="min-h-screen kiosk-canvas text-slate-900 pb-28 overflow-y-auto">
       {/* Header */}
-      <header className="glass-card sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md px-8 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <header className="glass-card sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-3 sm:px-8 py-2.5 sm:py-3.5 pt-[calc(env(safe-area-inset-top,0px)+0.65rem)] shadow-xs">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 sm:gap-4">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/doctor')}
@@ -230,38 +231,40 @@ export default function PatientDetail() {
                 <Stethoscope className="size-4.5" />
               </div>
               <div>
-                <span className="font-heading font-black text-slate-900 text-lg">
-                  ArogyaDarpan
-                </span>
-                <span className="ml-2 rounded-full bg-cobalt-soft px-2 py-0.5 text-[10px] font-bold text-cobalt border border-cobalt/20">
+                <span className="font-heading font-black text-slate-900 text-sm sm:text-lg">
+                ArogyaDarpan
+              </span>
+              <span className="hidden sm:inline ml-2 rounded-full bg-cobalt-soft px-2 py-0.5 text-[10px] font-bold text-cobalt border border-cobalt/20">
                   Physician Workbench
                 </span>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => setFhirModalOpen(true)}
-              className="glass-pill px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer flex items-center gap-1.5"
+              className="glass-pill px-2.5 sm:px-3.5 py-1.5 text-[11px] sm:text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer flex items-center gap-1 sm:gap-1.5"
             >
               <Code className="size-3.5 text-cobalt" />
-              <span>FHIR Bundle JSON</span>
+              <span className="hidden sm:inline">FHIR Bundle JSON</span>
+              <span className="sm:hidden">FHIR</span>
             </button>
             <button
               onClick={() => setFhirModalOpen(true)}
-              className="px-4 py-2 rounded-full bg-gradient-to-r from-cobalt to-cobalt-deep text-white text-xs font-bold shadow-cobalt hover:brightness-110 transition cursor-pointer flex items-center gap-1.5"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-cobalt to-cobalt-deep text-white text-[11px] sm:text-xs font-bold shadow-cobalt hover:brightness-110 transition cursor-pointer flex items-center gap-1 sm:gap-1.5"
             >
               <Download className="size-3.5" />
-              <span>Export to ABDM</span>
+              <span className="hidden sm:inline">Export to ABDM</span>
+              <span className="sm:hidden">Export</span>
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-8 py-6">
-        <div className="grid grid-cols-12 gap-6">
+      <main className="max-w-7xl mx-auto px-3 sm:px-8 py-4 sm:py-6">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6">
           {/* Left Column — Patient Vitals & Triage Signals */}
-          <div className="col-span-4 space-y-4">
+          <div className="md:col-span-4 space-y-4">
             <motion.div
               initial={{ opacity: 0, x: -15 }}
               animate={{ opacity: 1, x: 0 }}
@@ -326,7 +329,7 @@ export default function PatientDetail() {
           </div>
 
           {/* Right Column — Tabbed Clinical View */}
-          <div className="col-span-8 space-y-6">
+          <div className="md:col-span-8 space-y-4 sm:space-y-6">
             {/* AI Differential Diagnosis Widget */}
             <DifferentialDiagnosisWidget
               candidates={differentials}
@@ -341,14 +344,14 @@ export default function PatientDetail() {
             )}
 
             {/* Tab Nav */}
-            <div className="flex items-center gap-1.5 bg-white rounded-2xl border border-slate-200/80 p-1.5 shadow-xs overflow-x-auto">
+            <div className="flex items-center gap-1 sm:gap-1.5 bg-white rounded-xl sm:rounded-2xl border border-slate-200/80 p-1 sm:p-1.5 shadow-xs overflow-x-auto scrollbar-none">
               {tabs.map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`
-                    flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold font-heading whitespace-nowrap
-                    transition-all cursor-pointer
+                    flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold font-heading whitespace-nowrap
+                    transition-all cursor-pointer shrink-0
                     ${activeTab === tab.id
                       ? 'bg-slate-950 text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -700,7 +703,7 @@ export default function PatientDetail() {
                       </div>
 
                       {/* Sign and Finalize Button */}
-                      <div className="flex items-center justify-between pt-3 border-t border-border-light">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-border-light">
                         <span className="text-xs text-text-muted">
                           Directly links to ABDM Health Information Exchange (HIE-CM).
                         </span>
@@ -709,6 +712,7 @@ export default function PatientDetail() {
                           size="md"
                           icon={Check}
                           onClick={handleSignConsultation}
+                          className="w-full sm:w-auto justify-center whitespace-normal text-center py-2.5"
                         >
                           {physicianOrders.isSigned ? '✓ Signed & Finalized' : 'Sign & Complete Consultation'}
                         </Button>
@@ -940,6 +944,8 @@ export default function PatientDetail() {
           </div>
         </div>
       )}
+      {/* Mobile Bottom Navigation */}
+      <BottomNav />
     </div>
   )
 }
@@ -947,15 +953,15 @@ export default function PatientDetail() {
 function SummarySection({ title, content, source, status, onConfirm, onEdit, onReject, onViewSource }) {
   return (
     <Card>
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="font-bold text-text-primary font-heading text-base">{title}</h3>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+        <h3 className="font-bold text-text-primary font-heading text-sm sm:text-base leading-snug">{title}</h3>
         <VerificationButtons status={status} onConfirm={onConfirm} onEdit={onEdit} onReject={onReject} />
       </div>
-      <p className="text-sm text-text-secondary leading-relaxed">{content}</p>
+      <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">{content}</p>
       <div className="flex items-center justify-between mt-3 pt-2 border-t border-border-light text-xs">
-        <span className="text-text-muted">Source: {source}</span>
+        <span className="text-text-muted text-[11px]">Source: {source}</span>
         {onViewSource && (
-          <button onClick={onViewSource} className="text-primary-600 font-semibold hover:underline flex items-center gap-1 cursor-pointer">
+          <button onClick={onViewSource} className="text-primary-600 font-semibold hover:underline flex items-center gap-1 cursor-pointer text-xs">
             <Eye className="w-3.5 h-3.5" /> Inspect Evidence
           </button>
         )}

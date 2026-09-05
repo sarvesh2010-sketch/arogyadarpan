@@ -1,20 +1,31 @@
 {
-  "name": "arogyadarpan-frontend",
+  "name": "arogyadarpan-android",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cap:sync": "cap sync",
+    "cap:open": "cap open android",
+    "cap:run": "cap run android",
+    "build:android": "vite build && cap sync"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.0.1",
     "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-react": "^4.5.2",
     "tailwindcss": "^4.3.3",
     "vite": "^8.2.2"
   },
   "dependencies": {
+    "@capacitor/android": "^7.0.1",
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/camera": "^7.0.0",
+    "@capacitor/core": "^7.0.1",
+    "@capacitor/splash-screen": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0",
     "axios": "^1.20.0",
     "framer-motion": "^13.1.1",
     "lucide-react": "^1.39.0",

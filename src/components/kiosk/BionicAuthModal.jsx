@@ -115,20 +115,20 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 15 }}
         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-        className="glass-card w-full max-w-xl bg-white border border-slate-200/90 shadow-float rounded-3xl overflow-hidden relative"
+        className="glass-card w-full max-w-xl bg-white border border-slate-200/90 shadow-float rounded-2xl sm:rounded-3xl overflow-hidden relative max-h-[90dvh] overflow-y-auto"
       >
         {/* Top Header */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="size-10 rounded-2xl bg-gradient-to-tr from-cobalt to-cobalt-deep text-white flex items-center justify-center shadow-cobalt">
-              <UserCheck className="size-5" />
+        <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 border-b border-slate-100">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="size-8 sm:size-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-cobalt to-cobalt-deep text-white flex items-center justify-center shadow-cobalt">
+              <UserCheck className="size-4 sm:size-5" />
             </div>
             <div>
-              <h3 className="font-heading font-black text-lg text-slate-900">
-                Patient Authentication & Check-In
+              <h3 className="font-heading font-black text-sm sm:text-lg text-slate-900">
+                Patient Check-In
               </h3>
-              <p className="text-xs text-slate-500 font-medium">
-                ABDM National Digital Health Mission Linked
+              <p className="text-[10px] sm:text-xs text-slate-500 font-medium">
+                ABDM Digital Health Linked
               </p>
             </div>
           </div>
@@ -141,50 +141,53 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
         </div>
 
         {/* 3 Interactive Mode Tabs */}
-        <div className="px-6 pt-4">
-          <div className="flex p-1 bg-slate-100 rounded-2xl border border-slate-200/80">
+        <div className="px-4 sm:px-6 pt-3 sm:pt-4">
+          <div className="flex p-0.5 sm:p-1 bg-slate-100 rounded-xl sm:rounded-2xl border border-slate-200/80">
             <button
               type="button"
               onClick={() => { setActiveTab('login'); setIsOtpSent(false); setLoginError('') }}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-2 px-2 sm:px-3 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer ${
                 activeTab === 'login'
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-500 hover:text-slate-900'
               }`}
             >
-              <Phone className="size-3.5 text-cobalt" />
-              <span>Mobile / ABHA</span>
+              <Phone className="size-3 sm:size-3.5 text-cobalt" />
+              <span className="hidden sm:inline">Mobile / ABHA</span>
+              <span className="sm:hidden">Login</span>
             </button>
             <button
               type="button"
               onClick={() => { setActiveTab('register'); setRegError('') }}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-2 px-2 sm:px-3 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer ${
                 activeTab === 'register'
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-500 hover:text-slate-900'
               }`}
             >
-              <User className="size-3.5 text-emerald" />
-              <span>New Patient</span>
+              <User className="size-3 sm:size-3.5 text-emerald" />
+              <span className="hidden sm:inline">New Patient</span>
+              <span className="sm:hidden">Register</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('demo')}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-2 px-2 sm:px-3 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold transition flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer ${
                 activeTab === 'demo'
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-500 hover:text-slate-900'
               }`}
             >
-              <Sparkles className="size-3.5 text-amber-500" />
-              <span>1-Click Demo Profiles</span>
+              <Sparkles className="size-3 sm:size-3.5 text-amber-500" />
+              <span className="hidden sm:inline">1-Click Demo</span>
+              <span className="sm:hidden">Demo</span>
             </button>
           </div>
         </div>
 
         {/* Tab 1: Returning Patient Login */}
         {activeTab === 'login' && (
-          <div className="p-6 space-y-4">
+          <div className="p-4 sm:p-6 space-y-4">
             {!isOtpSent ? (
               <form onSubmit={handleRequestOtp} className="space-y-4">
                 <div>
@@ -280,7 +283,7 @@ export default function BionicAuthModal({ isOpen, onClose, onSuccess, initialMod
 
         {/* Tab 2: New Patient Registration */}
         {activeTab === 'register' && (
-          <form onSubmit={handleRegister} className="p-6 space-y-3.5 max-h-[460px] overflow-y-auto">
+          <form onSubmit={handleRegister} className="p-4 sm:p-6 space-y-3.5 max-h-[50dvh] overflow-y-auto">
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                 Full Name *

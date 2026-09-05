@@ -52,7 +52,7 @@ export default function DemoPage() {
   }
 
   return (
-    <div className="kiosk-canvas min-h-screen text-slate-900 select-none pb-16">
+    <div className="kiosk-canvas min-h-screen text-slate-900 pb-28 overflow-y-auto">
       {/* ── Top Frosted Glass Navbar ── */}
       <header className="glass-card sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-md px-4 sm:px-8 py-3.5 shadow-xs">
         <nav className="flex items-center justify-between max-w-7xl mx-auto">
