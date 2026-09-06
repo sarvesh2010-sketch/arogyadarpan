@@ -13,6 +13,7 @@ import Badge from '../../components/Badge'
 import LanguageSelector from '../../components/LanguageSelector'
 import Timeline from '../../components/Timeline'
 import DocumentInspectorModal from '../../components/DocumentInspectorModal'
+import StitchAppHeader from '../../components/StitchAppHeader'
 import { useLanguage } from '../../context/LanguageContext'
 import {
   getActivePatient,
@@ -76,31 +77,91 @@ export default function PatientDashboard() {
   }, [responses, patient])
 
   return (
-    <div className="min-h-screen kiosk-canvas text-slate-900 px-4 sm:px-8 py-8 select-none pb-12">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Top Bar Navigation */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/')}
-              className="glass-pill px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5 cursor-pointer"
-            >
-              ← Home
-            </button>
-            <span className="status-chip bg-cobalt-soft text-cobalt font-bold">
-              Patient Portal & Health Locker
-            </span>
+    <div className="min-h-screen bg-[#f7f9fb] text-slate-900 flex flex-col select-none pb-28 pb-safe">
+      <StitchAppHeader title="स्वास्थ्य केंद्र (Patient Wellness Hub)" showBack onBack={() => navigate('/')} />
+
+      <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
+        {/* Stitch Upcoming Consultation Hero Card */}
+        <div className="p-5 rounded-3xl bg-white border border-teal-500/20 shadow-xs backdrop-blur-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-shrink-0">
+              <img
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDI_vnaonz1_3Nzdgz6hH7_03cwDYwEEpn8cLmuZa2dxh3Jkp0OnCq5e7o5uB4JRzoWIQKylgRbAw_KLNFgpe9_mDpmSjJ2S_lWN7GJSU5JeVGai4MFaLdNKtIuvcmWh3mR_T1lNUxZr2E_YRz6A6U7gYMoB8TlhFSLDMoiM75Iiev51tQcz2lYsQrtc4gzki9DTUDp6XLhszNCJ05i59NiNzQuH5aV9eQC__mFxevP1t2XE3X09Arm"
+                alt="Dr. Ananya Sharma"
+                className="w-14 h-14 rounded-2xl object-cover shadow-sm ring-2 ring-teal-500/20"
+              />
+              <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-white" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h3 className="font-heading font-bold text-base text-slate-900">Dr. Ananya Sharma</h3>
+                <span className="text-teal-600 font-bold text-xs bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
+                  MD, Cardiology
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 mt-0.5">Apex Health Center, Room 204 • Today, 11:30 AM</p>
+              <div className="flex items-center gap-2 mt-1.5">
+                <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-emerald-700 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                  <Clock className="size-3" /> Token #A-14 (In Queue)
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <LanguageSelector variant="compact" />
-            <button
-              onClick={() => navigate('/patient/interview')}
-              className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-cobalt to-cobalt-deep text-white text-xs font-bold shadow-cobalt hover:brightness-110 transition cursor-pointer flex items-center gap-1.5"
-            >
-              <Plus className="size-3.5" />
-              <span>Intake Interview</span>
-            </button>
+          <button
+            onClick={() => navigate('/patient/interview')}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-gradient-to-r from-teal-600 to-teal-700 text-white font-heading font-bold text-xs shadow-teal-glow hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Sparkles className="size-4" />
+            <span>Continue Intake Interview</span>
+            <ArrowRight className="size-4" />
+          </button>
+        </div>
+
+        {/* Stitch 2x2 Quick Action Tiles */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div
+            onClick={() => navigate('/patient/interview')}
+            className="p-4 rounded-2xl bg-white border border-slate-200/80 hover:border-teal-500/50 shadow-xs hover:shadow-sm transition-all cursor-pointer group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+              <span className="text-xl">🎙️</span>
+            </div>
+            <p className="font-heading font-bold text-xs text-slate-900">Voice Intake</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">Speak symptoms</p>
+          </div>
+
+          <div
+            onClick={() => navigate('/patient/documents')}
+            className="p-4 rounded-2xl bg-white border border-slate-200/80 hover:border-teal-500/50 shadow-xs hover:shadow-sm transition-all cursor-pointer group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+              <span className="text-xl">📄</span>
+            </div>
+            <p className="font-heading font-bold text-xs text-slate-900">Upload Records</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">Scan prescription</p>
+          </div>
+
+          <div
+            onClick={() => setActiveTab('timeline')}
+            className="p-4 rounded-2xl bg-white border border-slate-200/80 hover:border-teal-500/50 shadow-xs hover:shadow-sm transition-all cursor-pointer group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+              <span className="text-xl">⏳</span>
+            </div>
+            <p className="font-heading font-bold text-xs text-slate-900">Medical Timeline</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">Longitudinal view</p>
+          </div>
+
+          <div
+            onClick={() => setActiveTab('records')}
+            className="p-4 rounded-2xl bg-white border border-slate-200/80 hover:border-teal-500/50 shadow-xs hover:shadow-sm transition-all cursor-pointer group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-700 flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform">
+              <span className="text-xl">💊</span>
+            </div>
+            <p className="font-heading font-bold text-xs text-slate-900">Current Meds</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">Track prescriptions</p>
           </div>
         </div>
 

@@ -5,7 +5,7 @@ import {
   Mic, FileText, Brain, ClipboardCheck,
   Stethoscope, ArrowRight, Shield, Globe,
   Heart, CheckCircle2, Sparkles, User, UserCheck,
-  Activity, ShieldCheck, Lock, ChevronRight, Phone
+  Activity, ShieldCheck, Lock, ChevronRight, Phone, Smartphone
 } from 'lucide-react'
 import LanguageSelector from '../components/LanguageSelector'
 import { useLanguage } from '../context/LanguageContext'
@@ -78,9 +78,9 @@ export default function LandingPage() {
   ]
 
   return (
-    <div className="kiosk-canvas min-h-screen text-slate-900 pb-28 overflow-y-auto">
+    <div className="kiosk-canvas min-h-screen text-slate-900 select-none pb-16">
       {/* ── Top Frosted Glass Navbar ── */}
-      <header className="glass-card sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-md px-3 sm:px-8 py-2.5 sm:py-3.5 shadow-xs">
+      <header className="glass-card sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-md px-4 sm:px-8 py-3.5 shadow-xs">
         <nav className="flex items-center justify-between max-w-7xl mx-auto">
           {/* Logo */}
           <div className="flex items-center gap-3">
@@ -88,7 +88,7 @@ export default function LandingPage() {
               AD<span className="-mt-2 text-xs font-bold text-emerald">+</span>
             </div>
             <div>
-              <span className="font-heading text-base sm:text-xl font-black tracking-tight text-slate-900 block leading-tight">
+              <span className="font-heading text-lg sm:text-xl font-black tracking-tight text-slate-900 block leading-tight">
                 ArogyaDarpan
               </span>
               <span className="text-[10px] font-bold text-slate-400 font-mono">
@@ -130,6 +130,14 @@ export default function LandingPage() {
             )}
 
             <button
+              onClick={() => navigate('/splash')}
+              className="glass-pill px-3.5 py-1.5 text-xs font-bold text-teal-700 hover:text-teal-900 border border-teal-200 bg-teal-50/50 hover:bg-teal-50 transition cursor-pointer flex items-center gap-1.5 shadow-xs"
+            >
+              <Smartphone className="size-3.5 text-teal-600" />
+              <span>Mobile App</span>
+            </button>
+
+            <button
               onClick={() => navigate('/doctor')}
               className="glass-pill px-3.5 py-1.5 text-xs font-bold text-slate-600 hover:text-cobalt border border-slate-200 transition cursor-pointer hidden md:flex items-center gap-1.5"
             >
@@ -141,7 +149,7 @@ export default function LandingPage() {
       </header>
 
       {/* ── Hero Section ── */}
-      <section className="max-w-6xl mx-auto px-3 sm:px-8 pt-6 sm:pt-16 pb-8 sm:pb-12 text-center">
+      <section className="max-w-6xl mx-auto px-4 sm:px-8 pt-10 sm:pt-16 pb-12 text-center">
         <motion.div initial="hidden" animate="visible" className="space-y-6">
           {/* Top Pill Disclaimer */}
           <motion.div custom={0} variants={fadeInUp} className="inline-flex items-center gap-2">
@@ -155,10 +163,10 @@ export default function LandingPage() {
           <motion.h1
             custom={1}
             variants={fadeInUp}
-            className="font-heading text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight max-w-4xl mx-auto leading-[1.1]"
+            className="font-heading text-4xl sm:text-5xl md:text-6xl font-black text-slate-900 tracking-tight max-w-4xl mx-auto leading-[1.1]"
           >
             Your complete health story, organized{' '}
-            <span className="rounded-xl sm:rounded-2xl bg-lime px-2.5 sm:px-4 py-0.5 text-lime-ink inline-block shadow-xs">
+            <span className="rounded-2xl bg-lime px-4 py-0.5 text-lime-ink inline-block shadow-xs">
               before
             </span>{' '}
             the doctor consultation.
@@ -178,11 +186,11 @@ export default function LandingPage() {
           <motion.div
             custom={3}
             variants={fadeInUp}
-            className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-2.5 sm:gap-3 pt-2"
+            className="flex flex-wrap items-center justify-center gap-3 pt-2"
           >
             <button
               onClick={() => handleOpenAuth('login')}
-              className="btn-bionic w-full sm:w-auto px-5 sm:px-7 py-3 sm:py-3.5 rounded-full text-white font-bold text-sm shadow-cobalt flex items-center justify-center gap-2.5 scale-100 hover:scale-105 transition-all"
+              className="btn-bionic px-7 py-3.5 rounded-full text-white font-bold text-sm shadow-cobalt flex items-center gap-2.5 scale-100 hover:scale-105 transition-all"
             >
               <UserCheck className="size-5" />
               <span>Patient Check-In & Launch Kiosk</span>
@@ -190,8 +198,16 @@ export default function LandingPage() {
             </button>
 
             <button
+              onClick={() => navigate('/splash')}
+              className="px-6 py-3.5 rounded-full text-xs sm:text-sm font-bold shadow-teal-glow bg-gradient-to-r from-teal-600 to-emerald-600 text-white flex items-center gap-2 hover:brightness-110 transition cursor-pointer"
+            >
+              <Smartphone className="size-4" />
+              <span>Mobile App Flow (Stitch UI)</span>
+            </button>
+
+            <button
               onClick={() => navigate('/kiosk')}
-              className="btn-bionic-outline w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 rounded-full text-xs sm:text-sm font-bold shadow-xs flex items-center justify-center gap-2"
+              className="btn-bionic-outline px-6 py-3.5 rounded-full text-xs sm:text-sm font-bold shadow-xs flex items-center gap-2"
             >
               <Activity className="size-4 text-cobalt" />
               <span>Explore MediKiosk Terminal</span>
@@ -199,7 +215,7 @@ export default function LandingPage() {
 
             <button
               onClick={() => navigate('/doctor')}
-              className="btn-bionic-outline w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 rounded-full text-xs sm:text-sm font-bold shadow-xs flex items-center justify-center gap-2"
+              className="btn-bionic-outline px-6 py-3.5 rounded-full text-xs sm:text-sm font-bold shadow-xs flex items-center gap-2"
             >
               <Stethoscope className="size-4 text-emerald" />
               <span>Physician Workbench</span>
@@ -210,7 +226,7 @@ export default function LandingPage() {
           <motion.div
             custom={4}
             variants={fadeInUp}
-            className="glass-card mt-6 sm:mt-10 p-4 sm:p-8 bg-white border border-slate-200/80 shadow-float rounded-2xl sm:rounded-3xl max-w-4xl mx-auto text-left"
+            className="glass-card mt-10 p-6 sm:p-8 bg-white border border-slate-200/80 shadow-float rounded-3xl max-w-4xl mx-auto text-left"
           >
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
               {/* Left preview: 3D Heart & Live Telemetry */}
@@ -219,7 +235,7 @@ export default function LandingPage() {
                 <img
                   src={heartOrgan}
                   alt="3D Heart Model"
-                  className="size-24 sm:size-36 object-contain animate-float-slow drop-shadow-xl z-10"
+                  className="size-36 object-contain animate-float-slow drop-shadow-xl z-10"
                 />
                 <div className="w-full mt-3 p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs z-10">
                   <div className="flex items-center justify-between">
@@ -278,7 +294,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Section 2: Clinical Workflow Stepper ── */}
-      <section className="max-w-6xl mx-auto px-3 sm:px-8 py-6 sm:py-10">
+      <section className="max-w-6xl mx-auto px-4 sm:px-8 py-10">
         <div className="glass-card p-6 sm:p-10 bg-white border border-slate-200/80 shadow-xs rounded-3xl">
           <div className="text-center mb-8">
             <span className="status-chip bg-cobalt-soft text-cobalt font-bold mb-2">
@@ -296,7 +312,7 @@ export default function LandingPage() {
             {flowSteps.map((step, i) => (
               <div
                 key={i}
-                className="glass-card tile-lift p-3 sm:p-4 rounded-2xl bg-slate-50 border border-slate-200/70 text-center flex flex-col items-center justify-between h-36 sm:h-44"
+                className="glass-card tile-lift p-4 rounded-2xl bg-slate-50 border border-slate-200/70 text-center flex flex-col items-center justify-between h-44"
               >
                 <div className="size-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-cobalt shadow-xs mb-2">
                   <step.icon className="size-6" />
@@ -319,7 +335,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Section 3: Feature Architecture Bento Grid ── */}
-      <section className="max-w-6xl mx-auto px-3 sm:px-8 py-4 sm:py-6">
+      <section className="max-w-6xl mx-auto px-4 sm:px-8 py-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {features.map((feat, i) => (
             <div
@@ -353,8 +369,8 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="max-w-6xl mx-auto px-3 sm:px-8 pt-8 sm:pt-12 text-center text-xs text-slate-500 font-medium">
-        <div className="p-3 sm:p-4 rounded-2xl bg-white border border-slate-200/80 flex flex-col sm:flex-row sm:flex-wrap items-center justify-between gap-2 shadow-xs">
+      <footer className="max-w-6xl mx-auto px-4 sm:px-8 pt-12 text-center text-xs text-slate-500 font-medium">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/80 flex flex-wrap items-center justify-between gap-2 shadow-xs">
           <div className="flex items-center gap-2">
             <Heart className="size-4 text-coral fill-coral" />
             <span className="font-bold text-slate-800 font-heading">

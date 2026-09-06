@@ -129,7 +129,6 @@ export function BottomNav() {
   )
 }
 
-
 function TopBar({ track, setTrack, patient, isAuthed, onOpenAuth, onLogout }) {
   const [showEmergency, setShowEmergency] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')

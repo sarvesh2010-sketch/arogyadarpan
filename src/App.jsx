@@ -4,7 +4,7 @@ import { AnimatePresence } from 'framer-motion'
 import { Capacitor } from '@capacitor/core'
 import { App as CapApp } from '@capacitor/app'
 import { StatusBar, Style } from '@capacitor/status-bar'
-import { SplashScreen } from '@capacitor/splash-screen'
+import { SplashScreen as CapSplashScreen } from '@capacitor/splash-screen'
 import { LanguageProvider } from './context/LanguageContext'
 
 // Pages
@@ -13,6 +13,7 @@ import DemoPage from './pages/DemoPage'
 import KioskView from './components/KioskView'
 
 // Patient Journey
+import SplashScreen from './pages/patient/SplashScreen'
 import LanguageSelection from './pages/patient/LanguageSelection'
 import ConsentScreen from './pages/patient/ConsentScreen'
 import PatientIdentification from './pages/patient/PatientIdentification'
@@ -34,9 +35,10 @@ function MobileAppController() {
   useEffect(() => {
     // Configure Native Mobile Status Bar & Splash Screen
     if (Capacitor.isNativePlatform()) {
-      StatusBar.setBackgroundColor({ color: '#0F766E' }).catch(() => {})
+      StatusBar.setBackgroundColor({ color: '#00685f' }).catch(() => {})
       StatusBar.setStyle({ style: Style.Dark }).catch(() => {})
-      SplashScreen.hide().catch(() => {})
+      StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {})
+      CapSplashScreen.hide().catch(() => {})
 
       // Handle Android Hardware Back Button
       const backListener = CapApp.addListener('backButton', ({ canGoBack }) => {
@@ -67,12 +69,15 @@ function AnimatedRoutes() {
       <MobileAppController />
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          {/* Landing & Kiosk */}
-          <Route path="/" element={<LandingPage />} />
+          {/* App Launch Splash & Landing */}
+          <Route path="/" element={<SplashScreen />} />
+          <Route path="/landing" element={<LandingPage />} />
           <Route path="/demo" element={<DemoPage />} />
           <Route path="/kiosk" element={<KioskView />} />
 
           {/* Patient Journey */}
+          <Route path="/splash" element={<SplashScreen />} />
+          <Route path="/patient/splash" element={<SplashScreen />} />
           <Route path="/patient/language" element={<LanguageSelection />} />
           <Route path="/patient/consent" element={<ConsentScreen />} />
           <Route path="/patient" element={<PatientIdentification />} />
