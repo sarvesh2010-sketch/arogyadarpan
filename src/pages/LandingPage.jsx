@@ -5,7 +5,7 @@ import {
   Mic, FileText, Brain, ClipboardCheck,
   Stethoscope, ArrowRight, Shield, Globe,
   Heart, CheckCircle2, Sparkles, User, UserCheck,
-  Activity, ShieldCheck, Lock, ChevronRight, Phone
+  Activity, ShieldCheck, Lock, ChevronRight, Phone, Smartphone
 } from 'lucide-react'
 import LanguageSelector from '../components/LanguageSelector'
 import { useLanguage } from '../context/LanguageContext'
@@ -130,6 +130,14 @@ export default function LandingPage() {
             )}
 
             <button
+              onClick={() => navigate('/splash')}
+              className="glass-pill px-3.5 py-1.5 text-xs font-bold text-teal-700 hover:text-teal-900 border border-teal-200 bg-teal-50/50 hover:bg-teal-50 transition cursor-pointer flex items-center gap-1.5 shadow-xs"
+            >
+              <Smartphone className="size-3.5 text-teal-600" />
+              <span>Mobile App</span>
+            </button>
+
+            <button
               onClick={() => navigate('/doctor')}
               className="glass-pill px-3.5 py-1.5 text-xs font-bold text-slate-600 hover:text-cobalt border border-slate-200 transition cursor-pointer hidden md:flex items-center gap-1.5"
             >
@@ -187,6 +195,14 @@ export default function LandingPage() {
               <UserCheck className="size-5" />
               <span>Patient Check-In & Launch Kiosk</span>
               <ArrowRight className="size-4" />
+            </button>
+
+            <button
+              onClick={() => navigate('/splash')}
+              className="px-6 py-3.5 rounded-full text-xs sm:text-sm font-bold shadow-teal-glow bg-gradient-to-r from-teal-600 to-emerald-600 text-white flex items-center gap-2 hover:brightness-110 transition cursor-pointer"
+            >
+              <Smartphone className="size-4" />
+              <span>Mobile App Flow (Stitch UI)</span>
             </button>
 
             <button

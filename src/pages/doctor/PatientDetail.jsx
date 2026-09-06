@@ -213,90 +213,125 @@ export default function PatientDetail() {
   const activeAllergies = summary.allergies ? (summary.allergies.historicalRecord ? [summary.allergies.historicalRecord] : ['Penicillin']) : []
 
   return (
-    <div className="min-h-screen kiosk-canvas text-slate-900 pb-12 select-none">
+    <div className="min-h-screen kiosk-canvas text-slate-900 pb-16 pb-safe select-none">
       {/* Header */}
-      <header className="glass-card sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md px-8 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl px-4 sm:px-8 py-3.5 shadow-xs pt-safe">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/doctor')}
-              className="glass-pill p-2 text-slate-500 hover:text-slate-900 transition cursor-pointer"
+              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer"
               title="Back to Dashboard"
             >
-              <ArrowLeft className="size-4.5" />
+              <ArrowLeft className="size-4" />
             </button>
-            <div className="flex items-center gap-2.5">
-              <div className="size-9 rounded-2xl bg-gradient-to-tr from-cobalt to-cobalt-deep flex items-center justify-center shadow-cobalt text-white">
-                <Stethoscope className="size-4.5" />
-              </div>
-              <div>
-                <span className="font-heading font-black text-slate-900 text-lg">
-                  ArogyaDarpan
-                </span>
-                <span className="ml-2 rounded-full bg-cobalt-soft px-2 py-0.5 text-[10px] font-bold text-cobalt border border-cobalt/20">
-                  Physician Workbench
-                </span>
+            <div className="flex items-center gap-2">
+              <img
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3eHJKlVlUerGVveGjWkAx0cFSCFro69yrIgqK3eka9ng6vqBFVGwgS2A1JBO0Lkr1B0YbrOAAqvpUol5ZixVmusIi8jYTSaQiV7PMb6CxrfSD-IXp-euifp5q0XRj-wTGxgLPdrcblNl08nnijat-BbHaH3XgsPx0yCKVhGM61cCDKXumY2fD-oQOhvcj5VgkwBSyiovAsy0-8W-nsfxyd2QqLNcETBIQ-JauQLnM_nekVmrRDp-J"
+                alt="ArogyaDarpan Logo"
+                className="h-7 w-auto object-contain"
+              />
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-heading font-black text-slate-900 text-base">ArogyaDarpan</span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-[#006947] font-mono text-[10px] font-bold border border-emerald-200/60">
+                    Clinical Decision Station
+                  </span>
+                </div>
+                <span className="text-[11px] text-slate-500 font-medium">Dr. Ananya Sharma • OPD Room 204</span>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => setFhirModalOpen(true)}
-              className="glass-pill px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer flex items-center gap-1.5"
             >
-              <Code className="size-3.5 text-cobalt" />
-              <span>FHIR Bundle JSON</span>
+              <Code className="size-3.5 text-teal-700" />
+              <span className="hidden sm:inline">FHIR Bundle JSON</span>
             </button>
             <button
               onClick={() => setFhirModalOpen(true)}
-              className="px-4 py-2 rounded-full bg-gradient-to-r from-cobalt to-cobalt-deep text-white text-xs font-bold shadow-cobalt hover:brightness-110 transition cursor-pointer flex items-center gap-1.5"
+              className="px-3.5 py-1.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-heading font-bold shadow-sm transition cursor-pointer flex items-center gap-1.5"
             >
               <Download className="size-3.5" />
-              <span>Export to ABDM</span>
+              <span>Export ABDM</span>
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-8 py-6">
-        <div className="grid grid-cols-12 gap-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column — Patient Vitals & Triage Signals */}
-          <div className="col-span-4 space-y-4">
+          <div className="w-full lg:col-span-4 space-y-4">
             <motion.div
               initial={{ opacity: 0, x: -15 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4 }}
               className="space-y-4"
             >
-              {/* Patient Profile Card */}
-              <Card>
-                <div className="text-center mb-4">
-                  <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-3 text-primary-700 text-xl font-bold font-heading border border-primary-200">
-                    {patient.name.split(' ').map(n => n[0]).join('')}
+              {/* Stitch Screen 14 Patient Profile & Critical Alert Context Card */}
+              <div className="rounded-2xl bg-white border border-slate-200/80 p-4 shadow-xs flex flex-col gap-3 relative overflow-hidden">
+                <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full bg-teal-500/10 blur-2xl pointer-events-none" />
+
+                {/* Demographics Main Row */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="relative shrink-0">
+                      <img
+                        className="w-12 h-12 rounded-full object-cover shadow-sm ring-2 ring-slate-100"
+                        alt={patient.name}
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjh8_SbNrrj7vsSdr0izshu6DgHanECLYgYVC745-J1gdhfCDIwtFMEjR5FT0cJGzqVSyvXQyJHXs87YGWPGvKKoR1wFc7tTZRT4pfZ8OaHcAU9MQZChLoySy5X198becf5PBxIFPQhR6lDKPHB5tf8RwfhH2fod7wntVf6O2MkHr1fpx7Ypsj2Xxdt96jqU8F-pG6MJq1GIgQlwn0zopNo4rDbpdS5ZQ3yzBjO5e6yrbGjFu5lHWc"
+                      />
+                      <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#00855b] ring-2 ring-white" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h1 className="font-heading font-bold text-base text-slate-900 tracking-tight">
+                          {patient.name}
+                        </h1>
+                        <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                          {patient.age || '32'}{patient.gender ? patient.gender[0] : 'M'}
+                        </span>
+                        <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#006947] border border-emerald-200/60">
+                          B+
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 text-[11px] font-mono text-slate-500 mt-0.5">
+                        <span className="material-symbols-outlined text-[13px] text-teal-700">badge</span>
+                        <span>ABHA: {patient.abhaId || '91-8842-1920-4491'}</span>
+                      </div>
+                    </div>
                   </div>
-                  <h2 className="text-lg font-bold text-text-primary font-heading">
-                    {patient.name}
-                  </h2>
-                  <p className="text-xs text-text-muted font-medium">{patient.age} yrs • {patient.gender} • ABHA: {patient.abhaId || 'ABHA-9821-1102'}</p>
+
+                  <div className="flex flex-col items-end shrink-0">
+                    <span className="font-mono text-[10px] font-bold px-2 py-1 rounded-lg bg-teal-50 text-teal-800 border border-teal-200/60 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[13px]">meeting_room</span>
+                      OPD 204
+                    </span>
+                    <span className="text-[11px] font-mono text-slate-400 mt-1">{patient.phone || '+91 98765-43210'}</span>
+                  </div>
                 </div>
 
-                <div className="space-y-2.5 text-xs border-t border-border-light pt-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-text-muted flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> Phone</span>
-                    <span className="font-semibold text-text-primary">{patient.phone}</span>
+                {/* Critical Diagnostic Flags Banner */}
+                <div className="rounded-xl bg-red-50 border border-red-200/80 p-3 flex flex-col gap-1.5 text-red-700 shadow-2xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-red-600 animate-pulse">emergency</span>
+                    <span className="font-heading font-bold text-xs text-red-800 tracking-tight">
+                      Critical Diagnostic Flags
+                    </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-text-muted flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> Department</span>
-                    <span className="font-semibold text-text-primary">{patient.consultation?.department || 'General Medicine'}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-text-muted flex items-center gap-1.5"><Activity className="w-3.5 h-3.5" /> Triage ESI</span>
-                    <Badge severity={clinicalSignals.some(s => s.severity === 'critical') ? 'critical' : 'success'} dot size="sm">
-                      {clinicalSignals.some(s => s.severity === 'critical') ? 'ESI Level 2 — Emergency' : 'ESI Level 4 — Routine'}
-                    </Badge>
+                  <div className="flex flex-col gap-1 pl-5 text-[11px]">
+                    <p className="font-medium text-slate-800">
+                      <span className="text-red-600 font-bold">Red Flag:</span> Acute retrosternal chest pain with left arm radiation.
+                    </p>
+                    <p className="font-medium text-slate-800">
+                      <span className="text-amber-600 font-bold">Conflict:</span> Penicillin allergy discrepancy between OCR (Allergic) & Voice Intake (None reported).
+                    </p>
                   </div>
                 </div>
-              </Card>
+              </div>
 
               {/* Drug Safety & Contraindication Matrix */}
               <DrugSafetyBanner medications={activeMeds} allergies={activeAllergies} />
@@ -326,7 +361,7 @@ export default function PatientDetail() {
           </div>
 
           {/* Right Column — Tabbed Clinical View */}
-          <div className="col-span-8 space-y-6">
+          <div className="w-full lg:col-span-8 space-y-6">
             {/* AI Differential Diagnosis Widget */}
             <DifferentialDiagnosisWidget
               candidates={differentials}
@@ -626,35 +661,37 @@ export default function PatientDetail() {
                         </div>
                         <div className="space-y-2">
                           {physicianOrders.medications.map((med, idx) => (
-                            <div key={idx} className="flex items-center gap-2 bg-surface-raised p-2.5 rounded-xl border border-border-light text-xs">
+                            <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-2 bg-surface-raised p-2.5 rounded-xl border border-border-light text-xs">
                               <input
                                 type="text"
                                 value={med.name}
                                 onChange={(e) => handleUpdateMed(idx, 'name', e.target.value)}
                                 placeholder="Drug Name & Strength"
-                                className="flex-1 font-bold text-text-primary bg-transparent focus:outline-none"
+                                className="w-full sm:flex-1 font-bold text-text-primary bg-transparent focus:outline-none"
                               />
                               <input
                                 type="text"
                                 value={med.instructions}
                                 onChange={(e) => handleUpdateMed(idx, 'instructions', e.target.value)}
                                 placeholder="Dosage & Timing"
-                                className="flex-1 text-text-secondary bg-transparent focus:outline-none"
+                                className="w-full sm:flex-1 text-text-secondary bg-transparent focus:outline-none"
                               />
-                              <input
-                                type="text"
-                                value={med.duration}
-                                onChange={(e) => handleUpdateMed(idx, 'duration', e.target.value)}
-                                placeholder="Duration"
-                                className="w-24 text-text-muted bg-transparent focus:outline-none text-right"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveMed(idx)}
-                                className="text-text-muted hover:text-red-500 cursor-pointer p-1"
-                              >
-                                <X className="w-3.5 h-3.5" />
-                              </button>
+                              <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+                                <input
+                                  type="text"
+                                  value={med.duration}
+                                  onChange={(e) => handleUpdateMed(idx, 'duration', e.target.value)}
+                                  placeholder="Duration"
+                                  className="w-24 text-text-muted bg-transparent focus:outline-none text-left sm:text-right"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveMed(idx)}
+                                  className="text-text-muted hover:text-red-500 cursor-pointer p-1"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </div>
                           ))}
                         </div>

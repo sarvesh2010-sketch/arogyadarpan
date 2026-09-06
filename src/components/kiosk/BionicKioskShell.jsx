@@ -43,7 +43,7 @@ function NavRail() {
   const navigate = useNavigate()
 
   return (
-    <aside className="flex w-[76px] shrink-0 flex-col items-center gap-3 py-6">
+    <aside className="hidden md:flex w-[76px] shrink-0 flex-col items-center gap-3 py-6">
       <Link
         to="/kiosk"
         title="ArogyaDarpan MediKiosk"
@@ -94,39 +94,78 @@ function NavRail() {
   )
 }
 
+export function BottomNav() {
+  const location = useLocation()
+
+  const mobileNavItems = [
+    { to: '/kiosk', label: 'Vitals', icon: HeartPulse },
+    { to: '/patient/interview', label: 'Intake', icon: MessageSquareText },
+    { to: '/patient/documents', label: 'OCR', icon: ScanLine },
+    { to: '/patient/document-review', label: 'Timeline', icon: History },
+    { to: '/doctor', label: 'Doctor', icon: Stethoscope },
+  ]
+
+  return (
+    <nav className="mobile-bottom-nav md:hidden" aria-label="Mobile Navigation">
+      {mobileNavItems.map(({ to, label, icon: Icon }) => {
+        const active = location.pathname === to || (to !== '/kiosk' && location.pathname.startsWith(to))
+        return (
+          <Link
+            key={to}
+            to={to}
+            className={`mobile-bottom-nav-item tap-bounce ${active ? 'active' : ''}`}
+          >
+            <div className="nav-icon-wrapper">
+              <Icon />
+            </div>
+            <span>{label}</span>
+            {active && (
+              <span className="size-1 rounded-full bg-cobalt mt-0.5 animate-pulse" />
+            )}
+          </Link>
+        )
+      })}
+    </nav>
+  )
+}
+
 function TopBar({ track, setTrack, patient, isAuthed, onOpenAuth, onLogout }) {
   const [showEmergency, setShowEmergency] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const { lang, setLanguage, languages } = useLanguage()
 
   return (
-    <header className="flex flex-wrap items-center gap-3 py-4 sm:py-5 pr-1 border-b border-slate-200/60 mb-6">
-      {/* Modern vs AYUSH Pill Switcher */}
-      <div className="glass-pill flex items-center gap-1 p-1 bg-white shadow-xs">
+    <header className="flex flex-wrap items-center gap-2 sm:gap-3 py-3 sm:py-5 pr-1 border-b border-slate-200/60 mb-4 sm:mb-6">
+      {/* Modern vs AYUSH Pill Switcher — compact on mobile */}
+      <div className="glass-pill flex items-center gap-0.5 sm:gap-1 p-0.5 sm:p-1 bg-white shadow-xs">
         <button
           onClick={() => setTrack('modern')}
           className={
             track === 'modern'
-              ? 'flex items-center gap-2 rounded-full bg-cobalt px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-cobalt transition cursor-pointer'
-              : 'flex items-center gap-2 rounded-full px-4 py-2 text-xs sm:text-sm font-medium text-slate-500 hover:text-slate-900 transition cursor-pointer'
+              ? 'flex items-center gap-1 sm:gap-2 rounded-full bg-cobalt px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm font-semibold text-white shadow-cobalt transition cursor-pointer'
+              : 'flex items-center gap-1 sm:gap-2 rounded-full px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm font-medium text-slate-500 hover:text-slate-900 transition cursor-pointer'
           }
         >
-          <Stethoscope className="size-4" /> Modern Medicine
+          <Stethoscope className="size-3.5 sm:size-4" />
+          <span className="hidden sm:inline">Modern Medicine</span>
+          <span className="sm:hidden">Modern</span>
         </button>
         <button
           onClick={() => setTrack('ayush')}
           className={
             track === 'ayush'
-              ? 'flex items-center gap-2 rounded-full bg-emerald px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-glass transition cursor-pointer'
-              : 'flex items-center gap-2 rounded-full px-4 py-2 text-xs sm:text-sm font-medium text-slate-500 hover:text-emerald-700 transition cursor-pointer'
+              ? 'flex items-center gap-1 sm:gap-2 rounded-full bg-emerald px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm font-semibold text-white shadow-glass transition cursor-pointer'
+              : 'flex items-center gap-1 sm:gap-2 rounded-full px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm font-medium text-slate-500 hover:text-emerald-700 transition cursor-pointer'
           }
         >
-          <Leaf className="size-4" /> AYUSH Intake
+          <Leaf className="size-3.5 sm:size-4" />
+          <span className="hidden sm:inline">AYUSH Intake</span>
+          <span className="sm:hidden">AYUSH</span>
         </button>
       </div>
 
       {/* Clinical Search Bar with live suggestions (matching image 3) */}
-      <div className="relative min-w-[220px] flex-1">
+      <div className="relative hidden sm:block min-w-[220px] flex-1">
         <label className="glass-pill flex w-full items-center gap-3 px-4 py-2.5 bg-white shadow-xs">
           <Search className="size-4 text-slate-400 shrink-0" />
           <input
@@ -194,16 +233,16 @@ function TopBar({ track, setTrack, patient, isAuthed, onOpenAuth, onLogout }) {
         onClick={() => setShowEmergency(true)}
         aria-label="Call Assistance"
         title="Immediate Nurse / Clinician Assistance"
-        className="flex size-10 sm:size-11 items-center justify-center rounded-full bg-[#0d5c52] text-white shadow-cobalt hover:scale-105 active:scale-95 transition cursor-pointer shrink-0"
+        className="hidden sm:flex size-10 sm:size-11 items-center justify-center rounded-full bg-[#0d5c52] text-white shadow-cobalt hover:scale-105 active:scale-95 transition cursor-pointer shrink-0"
       >
         <PhoneCall className="size-4" />
       </button>
 
-      {/* Notification Bell with pulse */}
+      {/* Notification Bell with pulse — hidden on mobile */}
       <button
         aria-label="Notifications"
         title="Active Clinical Alerts"
-        className="glass-pill relative flex size-10 sm:size-11 items-center justify-center bg-white shadow-xs cursor-pointer shrink-0"
+        className="glass-pill relative hidden sm:flex size-10 sm:size-11 items-center justify-center bg-white shadow-xs cursor-pointer shrink-0"
       >
         <Bell className="size-4 text-slate-700" />
         <span className="absolute right-2.5 top-2.5 size-2 rounded-full bg-coral animate-soft-pulse" />
@@ -211,13 +250,13 @@ function TopBar({ track, setTrack, patient, isAuthed, onOpenAuth, onLogout }) {
 
       {/* ABHA Patient Profile Badge or Login Button */}
       {isAuthed ? (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <button
             onClick={onOpenAuth}
-            className="glass-pill flex items-center gap-2.5 py-1.5 pl-1.5 pr-4 bg-white shadow-xs hover:border-cobalt transition cursor-pointer border border-slate-200/80"
+            className="glass-pill flex items-center gap-1.5 sm:gap-2.5 py-1 sm:py-1.5 pl-1 sm:pl-1.5 pr-2 sm:pr-4 bg-white shadow-xs hover:border-cobalt transition cursor-pointer border border-slate-200/80"
             title="Click to Switch Patient or View Details"
           >
-            <span className="flex size-8 sm:size-9 items-center justify-center rounded-full bg-emerald-soft text-xs font-bold text-cobalt border border-cobalt/20">
+            <span className="flex size-7 sm:size-9 items-center justify-center rounded-full bg-emerald-soft text-[10px] sm:text-xs font-bold text-cobalt border border-cobalt/20">
               {patient?.name
                 ?.split(' ')
                 .map((n) => n[0])
@@ -225,10 +264,10 @@ function TopBar({ track, setTrack, patient, isAuthed, onOpenAuth, onLogout }) {
                 .slice(0, 2) || 'AD'}
             </span>
             <span className="leading-tight text-left">
-              <span className="block text-xs sm:text-sm font-semibold text-slate-900">
+              <span className="block text-[11px] sm:text-sm font-semibold text-slate-900 truncate max-w-[80px] sm:max-w-none">
                 {patient?.name || 'Rahul Sharma'}
               </span>
-              <span className="block text-[10px] text-slate-500 font-mono">
+              <span className="hidden sm:block text-[10px] text-slate-500 font-mono">
                 {patient?.abhaId || 'ABHA-1234-5678'}
               </span>
             </span>
@@ -236,7 +275,7 @@ function TopBar({ track, setTrack, patient, isAuthed, onOpenAuth, onLogout }) {
           <button
             onClick={onLogout}
             title="Sign Out Patient"
-            className="glass-pill p-2 text-slate-400 hover:text-coral transition cursor-pointer"
+            className="glass-pill p-1.5 sm:p-2 text-slate-400 hover:text-coral transition cursor-pointer"
           >
             <LogOut className="size-4" />
           </button>
@@ -317,10 +356,10 @@ export function BionicKioskShell({ children, activeTrack, onTrackChange }) {
 
   return (
     <TrackContext.Provider value={{ track, setTrack: handleTrackChange }}>
-      <div className="kiosk-canvas min-h-screen p-2 sm:p-5 select-none">
-        <div className="mx-auto flex max-w-[1540px] gap-2 sm:gap-4 rounded-[2.25rem] border border-slate-200/80 bg-white/95 px-3 sm:px-6 shadow-glass backdrop-blur-md min-h-[92vh]">
+      <div className="kiosk-canvas min-h-screen p-1 sm:p-5 pb-28 md:pb-6 overflow-y-auto">
+        <div className="mx-auto flex max-w-[1540px] gap-0 md:gap-4 rounded-2xl md:rounded-[2.25rem] border border-slate-200/80 bg-white/95 px-2 sm:px-6 shadow-glass backdrop-blur-md min-h-[92vh]">
           <NavRail />
-          <div className="min-w-0 flex-1 pb-8 flex flex-col">
+          <div className="min-w-0 flex-1 pb-4 sm:pb-8 flex flex-col">
             <TopBar
               track={track}
               setTrack={handleTrackChange}
@@ -333,6 +372,8 @@ export function BionicKioskShell({ children, activeTrack, onTrackChange }) {
           </div>
         </div>
       </div>
+
+      <BottomNav />
 
       <BionicAuthModal
         isOpen={showAuthModal}

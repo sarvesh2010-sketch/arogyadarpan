@@ -8,6 +8,7 @@ import DemoPage from './pages/DemoPage'
 import KioskView from './components/KioskView'
 
 // Patient Journey
+import SplashScreen from './pages/patient/SplashScreen'
 import LanguageSelection from './pages/patient/LanguageSelection'
 import ConsentScreen from './pages/patient/ConsentScreen'
 import PatientIdentification from './pages/patient/PatientIdentification'
@@ -28,12 +29,15 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        {/* Landing & Kiosk */}
-        <Route path="/" element={<LandingPage />} />
+        {/* App Launch Splash & Landing */}
+        <Route path="/" element={<SplashScreen />} />
+        <Route path="/landing" element={<LandingPage />} />
         <Route path="/demo" element={<DemoPage />} />
         <Route path="/kiosk" element={<KioskView />} />
 
         {/* Patient Journey */}
+        <Route path="/splash" element={<SplashScreen />} />
+        <Route path="/patient/splash" element={<SplashScreen />} />
         <Route path="/patient/language" element={<LanguageSelection />} />
         <Route path="/patient/consent" element={<ConsentScreen />} />
         <Route path="/patient" element={<PatientIdentification />} />

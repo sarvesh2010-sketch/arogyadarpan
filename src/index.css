@@ -7,8 +7,43 @@
 @theme {
   --font-heading: 'Plus Jakarta Sans', sans-serif;
   --font-body: 'DM Sans', sans-serif;
+  --font-metrics: 'JetBrains Mono', monospace;
 
-  /* Primary - Calm Teal */
+  /* Primary - Calm Teal & Stitch Tokens */
+  --color-primary-teal: #0d9488;
+  --color-primary-teal-hover: #0f766e;
+  --color-primary-teal-glow: rgba(13, 148, 136, 0.22);
+  --color-vitality-emerald: #10b981;
+  --color-vitality-emerald-soft: rgba(16, 185, 129, 0.12);
+  --color-electric-cyan: #06b6d4;
+  --color-electric-cyan-soft: rgba(6, 182, 212, 0.14);
+  --color-redflag-coral: #ef4444;
+  --color-redflag-coral-soft: rgba(239, 68, 68, 0.12);
+  --color-alert-amber: #f59e0b;
+  --color-alert-amber-soft: rgba(245, 158, 11, 0.12);
+
+  /* Stitch Glass & Surfaces */
+  --color-surface-glass: rgba(255, 255, 255, 0.82);
+  --color-border-glass: rgba(255, 255, 255, 0.60);
+  --color-border-subtle: #e2e8f0;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f4f6;
+  --color-surface-container: #eceef0;
+  --color-surface-container-high: #e6e8ea;
+  --color-surface-container-highest: #e0e3e5;
+  --color-on-surface: #191c1e;
+  --color-on-surface-variant: #3d4947;
+  --color-tertiary: #006947;
+  --color-tertiary-container: #00855b;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #f5fff6;
+  --color-secondary-container: #57dffe;
+  --color-on-secondary-container: #006172;
+  --color-primary-container: #008378;
+  --color-on-primary-container: #f4fffc;
+  --color-outline-variant: #bcc9c6;
+  --color-outline: #6d7a77;
+
   --color-primary-50: #edfaf8;
   --color-primary-100: #d2f3ee;
   --color-primary-200: #a8e8df;
@@ -63,6 +98,7 @@
   --radius-lg: 1rem;
   --radius-xl: 1.25rem;
   --radius-2xl: 1.5rem;
+  --radius-3xl: 1.75rem;
 }
 
 /* ============================
@@ -340,4 +376,170 @@ h1, h2, h3, h4, h5, h6 {
 .animate-float-slow {
   animation: float-slow 7s ease-in-out infinite;
 }
+
+/* ============================================================
+   STITCH ZEN-CLINICAL GLASS UTILITIES & SHADOWS
+   ============================================================ */
+
+.bg-surface-glass {
+  background-color: rgba(255, 255, 255, 0.84) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+.border-glass {
+  border-color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.touch-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+.touch-pill:active {
+  transform: scale(0.96);
+}
+
+.shadow-teal-glow {
+  box-shadow: 0 10px 28px -6px rgba(13, 148, 136, 0.35) !important;
+}
+
+.shadow-amber-glow {
+  box-shadow: 0 10px 24px -6px rgba(245, 158, 11, 0.28) !important;
+}
+
+.shadow-coral-glow {
+  box-shadow: 0 10px 28px -6px rgba(239, 68, 68, 0.35) !important;
+}
+
+@keyframes pulseTravel {
+  0% { transform: translateX(-100%); width: 25%; }
+  50% { transform: translateX(100%); width: 50%; }
+  100% { transform: translateX(350%); width: 25%; }
+}
+
+@keyframes breatheGlow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+    filter: drop-shadow(0 0 18px rgba(13, 148, 136, 0.45));
+  }
+}
+
+.animate-breathe-glow {
+  animation: breatheGlow 3s ease-in-out infinite;
+}
+
+/* ============================================================
+   SAFE AREA & MOBILE ERGONOMICS (Video Frame Audit)
+   ============================================================ */
+
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
+.pt-safe {
+  padding-top: max(var(--sat), 16px) !important;
+}
+
+.pb-safe {
+  padding-bottom: max(var(--sab), 16px) !important;
+}
+
+.pl-safe {
+  padding-left: max(var(--sal), 16px) !important;
+}
+
+.pr-safe {
+  padding-right: max(var(--sar), 16px) !important;
+}
+
+/* ============================================================
+   MOBILE BOTTOM NAVIGATION BAR (Fixes Frame 024 Vertical Stack)
+   ============================================================ */
+
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding-top: 0.5rem;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 0.65rem);
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.mobile-bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.75rem;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-heading), 'Plus Jakarta Sans', sans-serif;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 54px;
+}
+
+.mobile-bottom-nav-item:active {
+  transform: scale(0.92);
+}
+
+.mobile-bottom-nav-item.active {
+  color: #0d5c52;
+}
+
+.mobile-bottom-nav-item.active .nav-icon-wrapper {
+  background: rgba(13, 92, 82, 0.12);
+  color: #0d5c52;
+  transform: translateY(-2px);
+}
+
+.nav-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.nav-icon-wrapper svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Tap bounce micro-interaction */
+.tap-bounce:active {
+  transform: scale(0.94);
+}
+
+
 
