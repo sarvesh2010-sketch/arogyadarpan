@@ -128,12 +128,12 @@ export default function CameraCaptureModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md overflow-x-hidden overflow-y-auto w-full max-w-[100vw]">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="bg-slate-900 rounded-3xl overflow-hidden max-w-xl w-full border border-slate-700 shadow-2xl flex flex-col"
+          className="bg-slate-900 rounded-2xl sm:rounded-3xl overflow-hidden max-w-xl w-full max-w-[calc(100vw-1.5rem)] border border-slate-700 shadow-2xl flex flex-col my-auto"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-900/90">

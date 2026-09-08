@@ -127,6 +127,56 @@ export function formatClinicalValue(val) {
 }
 
 /**
+ * Check whether a patient is currently authenticated / checked in
+ */
+export function isAuthenticated() {
+  try {
+    const stored = localStorage.getItem('arogya_patient')
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      return Boolean(parsed && parsed.name && (parsed.isAuthenticated || parsed.patientId))
+    }
+  } catch (e) {
+    console.warn('Auth check error:', e)
+  }
+  return false
+}
+
+/**
+ * Log in a patient and store active session credentials
+ */
+export function loginPatient(patientRecord) {
+  try {
+    const sessionPatient = {
+      ...patientRecord,
+      isAuthenticated: true,
+      loggedInAt: new Date().toISOString()
+    }
+    localStorage.setItem('arogya_patient', JSON.stringify(sessionPatient))
+    // Also save to registry if not already present
+    saveRegisteredPatient(sessionPatient)
+    return sessionPatient
+  } catch (e) {
+    console.warn('Login error:', e)
+    return patientRecord
+  }
+}
+
+/**
+ * Log out current patient session cleanly
+ */
+export function logoutPatient() {
+  try {
+    localStorage.removeItem('arogya_patient')
+    localStorage.removeItem('arogya_responses')
+    localStorage.removeItem('arogya_interview_state')
+    localStorage.removeItem('arogya_documents')
+  } catch (e) {
+    console.warn('Logout error:', e)
+  }
+}
+
+/**
  * Retrieve active patient profile (from localStorage or demo fallback)
  */
 export function getActivePatient() {
@@ -575,10 +625,12 @@ export function buildDynamicConfirmationItems() {
     items.push({ label: 'Started', value: formatClinicalValue(onset.structuredValue || onset.originalResponse), status: 'confirmed' })
   }
 
-  // Severity
+  // Severity (strictly clamped 1 - 10)
   const severity = responses.find(r => r.questionId.includes('severity'))
   if (severity) {
-    items.push({ label: 'Severity Score', value: `${severity.structuredValue || 5} / 10`, status: 'confirmed' })
+    const rawNum = parseInt(severity.structuredValue, 10)
+    const clamped = isNaN(rawNum) ? 5 : Math.min(10, Math.max(1, rawNum))
+    items.push({ label: 'Severity Score', value: `${clamped} / 10`, status: 'confirmed' })
   }
 
   // Past Medical Conditions
