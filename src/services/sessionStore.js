@@ -184,7 +184,20 @@ export function getActivePatient() {
     const stored = localStorage.getItem('arogya_patient')
     if (stored) {
       const parsed = JSON.parse(stored)
-      if (parsed && parsed.name) return parsed
+      if (parsed && (parsed.name || parsed.patientId)) return parsed
+    }
+    // Check if user has answered questions or uploaded documents without full registration
+    const storedResponses = localStorage.getItem('arogya_responses')
+    const storedDocs = localStorage.getItem('arogya_documents')
+    if ((storedResponses && JSON.parse(storedResponses).length > 0) || (storedDocs && JSON.parse(storedDocs).length > 0)) {
+      return {
+        patientId: 'AD-LIVE-001',
+        name: 'Kiosk Patient',
+        age: '',
+        gender: '',
+        phone: '',
+        isLivePatient: true,
+      }
     }
   } catch (e) {
     console.warn('Session store error:', e)
@@ -672,3 +685,104 @@ export function buildDynamicConfirmationItems() {
 
   return items
 }
+
+/**
+ * Format current live kiosk patient session into a full doctor patient record
+ */
+export function getActivePatientAsDoctorRecord() {
+  const patient = getActivePatient()
+  const responses = getActiveResponses()
+  const documents = getActiveDocuments()
+
+  if (responses.length === 0 && documents.length === 0) {
+    return null
+  }
+
+  const chiefComplaintResp = responses.find(r => r.questionId === 'chief_complaint')
+  const chiefComplaintVal = chiefComplaintResp?.structuredValue || 'chest_pain'
+  const chiefComplaintText = chiefComplaintResp?.originalResponse || formatClinicalValue(chiefComplaintVal)
+
+  const severityResp = responses.find(r => r.questionId.includes('severity'))
+  const rawSev = severityResp ? parseInt(severityResp.structuredValue, 10) : 5
+  const severityScore = isNaN(rawSev) ? 5 : Math.min(10, Math.max(1, rawSev))
+
+  const pastResp = responses.find(r => r.questionId === 'past_medical')
+  const pastText = pastResp ? formatClinicalValue(pastResp.structuredValue) : 'No past medical conditions reported'
+
+  const medsResp = responses.find(r => r.questionId === 'current_medications')
+  const medsText = medsResp ? formatClinicalValue(medsResp.structuredValue) : 'No regular medications'
+
+  const allergyResp = responses.find(r => r.questionId === 'allergies')
+  const allergyText = allergyResp ? formatClinicalValue(allergyResp.structuredValue) : 'No known drug allergies'
+
+  const clinicalSignals = []
+  if (severityScore >= 8) {
+    clinicalSignals.push({
+      id: 'sig-live-1',
+      title: 'High Pain Severity Score',
+      severity: 'critical',
+      description: `Patient reported severe pain score of ${severityScore}/10 during kiosk intake.`,
+      source: 'Patient Self-Report (Kiosk Intake)',
+    })
+  }
+  if (chiefComplaintVal === 'chest_pain') {
+    clinicalSignals.push({
+      id: 'sig-live-2',
+      title: 'Acute Chest Pain Red-Flag',
+      severity: 'high',
+      description: 'Potential cardiac or acute thoracic etiology requiring immediate ECG evaluation.',
+      source: 'Clinical Decision Rules (ESI Level 2)',
+    })
+  }
+
+  return {
+    id: patient.patientId || 'live-kiosk-patient',
+    isLiveKioskPatient: true,
+    name: patient.name || 'Live Kiosk Patient',
+    age: parseInt(patient.age, 10) || 46,
+    gender: patient.gender || 'Male',
+    phone: patient.phone || '9876543210',
+    abhaId: patient.abhaId || 'ABHA-9182-4491-2026',
+    language: patient.language || 'hi',
+    createdAt: new Date().toISOString(),
+    consultation: {
+      id: 'consult-live-001',
+      department: 'General Medicine / OPD Room 12',
+      chiefComplaint: chiefComplaintVal,
+      chiefComplaintText: chiefComplaintText,
+      status: 'ready_for_review',
+      language: patient.language || 'hi',
+      consentGiven: true,
+      startedAt: new Date().toISOString(),
+      completedAt: new Date().toISOString(),
+    },
+    clinicalSignals,
+    interviewResponses: responses,
+    summary: {
+      chiefComplaint: chiefComplaintText,
+      hpi: `Patient presents with ${chiefComplaintText}. Pain severity rated at ${severityScore}/10. Reported onset is recent.`,
+      pastMedical: pastText,
+      surgicalHistory: 'None reported',
+      medications: [{ name: medsText, dosage: 'As reported', frequency: 'Daily' }],
+      allergies: { drug: allergyText, severity: 'Needs verification' },
+      familyHistory: 'No specific family history recorded',
+      personalHistory: 'Non-smoker, non-alcoholic',
+      reviewOfSystems: { cardiovascular: 'Chest discomfort noted', respiratory: 'Mild dyspnea' },
+      priorInvestigations: documents.map(d => d.fileName || 'Uploaded Medical Record'),
+    },
+    timeline: buildDynamicTimeline(),
+    documents,
+  }
+}
+
+/**
+ * Merge live kiosk patient into list of doctor OPD queue patients
+ */
+export function getAllDoctorPatients(demoPatients = []) {
+  const liveRecord = getActivePatientAsDoctorRecord()
+  if (liveRecord) {
+    return [liveRecord, ...demoPatients.filter(p => p.id !== liveRecord.id)]
+  }
+  return demoPatients
+}
+

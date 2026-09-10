@@ -1,6 +1,7 @@
 // ============================================================================
 // ArogyaDarpan — Advanced Client-Side Optical Character Recognition (OCR) Engine
-// Integrated with Medical Document Intelligence & Drug-Drug Interaction Check
+// Integrated with Medical Document Intelligence, Drug-Drug Interaction Check,
+// and Groq LLM-Powered Post-Processing for enhanced entity extraction.
 // ============================================================================
 
 import { createWorker } from 'tesseract.js'
@@ -11,9 +12,11 @@ import {
   classifyDocument
 } from './documentIntelligenceEngine'
 import { detectDrugInteractions } from './drugInteractionEngine'
+import { extractDocumentTextWithLlama } from './llamaService'
 
 /**
  * Perform real OCR text extraction and Medical Document Intelligence on an image
+ * Now with LLM-enhanced post-processing for superior entity extraction.
  * @param {File|Blob|string} imageSource - The uploaded medical document image
  * @param {Function} onProgress - Progress callback (0-100)
  * @returns {Promise<Object>} Extracted clinical entities, classification, normalized meds, and CDS alerts
@@ -36,7 +39,7 @@ export async function scanMedicalDocument(imageSource, onProgress) {
 
     await worker.terminate()
 
-    onProgress?.({ status: 'Executing Medical Document Intelligence...', progress: 85 })
+    onProgress?.({ status: 'Executing Medical Document Intelligence...', progress: 65 })
   } catch (err) {
     console.warn('Tesseract OCR fallback triggered:', err)
     // Dynamic fallback based on active patient session
@@ -82,8 +85,29 @@ export async function scanMedicalDocument(imageSource, onProgress) {
   const docIntel = processMedicalDocumentIntelligence(rawText)
   const parsedBasic = extractMedicalEntities(rawText)
 
-  // 2. Merge investigations from both engines to guarantee rich lab structure
+  // 2. LLM-enhanced extraction (Groq API post-processing)
+  let llamaExtraction = null
+  let plainLanguageSummary = null
+  try {
+    onProgress?.({ status: '🧠 AI analyzing document with Groq LLM...', progress: 75 })
+    llamaExtraction = await extractDocumentTextWithLlama(rawText)
+
+    if (llamaExtraction) {
+      plainLanguageSummary = {
+        en: llamaExtraction.plainLanguageSummaryEn || null,
+        hi: llamaExtraction.plainLanguageSummaryHi || null,
+      }
+    }
+  } catch (err) {
+    console.warn('LLM document extraction fallback — using regex only:', err)
+  }
+
+  onProgress?.({ status: 'Merging AI + regex extraction results...', progress: 85 })
+
+  // 3. Merge investigations from all three engines
   const mergedInvestigations = [...docIntel.extractedData.investigations]
+
+  // Add from regex parser
   for (const lab of parsedBasic.labResults) {
     if (!mergedInvestigations.some(i => i.test.toLowerCase().includes(lab.key) || i.test.toLowerCase().includes(lab.name.toLowerCase()))) {
       mergedInvestigations.push({
@@ -100,34 +124,85 @@ export async function scanMedicalDocument(imageSource, onProgress) {
     }
   }
 
-  // 3. Merge diagnoses
+  // Add from LLM extraction (highest quality)
+  if (llamaExtraction?.labResults) {
+    for (const lab of llamaExtraction.labResults) {
+      const testName = (lab.test || '').toLowerCase()
+      if (!mergedInvestigations.some(i => i.test.toLowerCase().includes(testName) || testName.includes(i.test.toLowerCase()))) {
+        mergedInvestigations.push({
+          test: lab.test,
+          value: lab.value,
+          unit: lab.unit,
+          type: 'laboratory',
+          referenceRange: lab.referenceRange,
+          status: lab.status || 'normal',
+          direction: lab.direction || 'normal',
+          abnormalFlag: lab.status === 'abnormal'
+            ? (lab.direction === 'high' ? '↑ Abnormal' : '↓ Low')
+            : 'Normal',
+          clinicalSignificance: lab.clinicalSignificance || '',
+          confidence: 0.96,
+          source: 'llm'
+        })
+      }
+    }
+  }
+
+  // 4. Merge diagnoses from all sources
   const allDiagnoses = Array.from(new Set([
     ...docIntel.extractedData.diagnoses,
+    ...(llamaExtraction?.diagnoses || []).map(d => d.condition || d),
     ...(rawText.toLowerCase().includes('diabetes') ? ['Type 2 Diabetes Mellitus'] : []),
     ...(rawText.toLowerCase().includes('hypertension') ? ['Essential Hypertension'] : []),
   ]))
 
-  // 4. Merge medications
-  const allMedications = docIntel.extractedData.medications.length > 0
-    ? docIntel.extractedData.medications
-    : parsedBasic.medications.map(m => ({
-        name: m.name,
-        strength: m.dosage || 'Standard dose',
-        frequency: 'Once Daily (OD)',
-        duration: '30 days',
-        category: m.category,
-        confidence: m.confidence || 0.92
-      }))
+  // 5. Merge medications — prefer LLM extraction for richer metadata
+  let allMedications = []
+  if (llamaExtraction?.medications?.length > 0) {
+    allMedications = llamaExtraction.medications.map(m => ({
+      name: m.name,
+      strength: m.strength || 'Standard dose',
+      frequency: m.frequency || 'As prescribed',
+      duration: m.duration || '',
+      instructions: m.instructions || '',
+      category: m.category || '',
+      confidence: 0.96,
+      source: 'llm'
+    }))
+  } else if (docIntel.extractedData.medications.length > 0) {
+    allMedications = docIntel.extractedData.medications
+  } else {
+    allMedications = parsedBasic.medications.map(m => ({
+      name: m.name,
+      strength: m.dosage || 'Standard dose',
+      frequency: 'Once Daily (OD)',
+      duration: '30 days',
+      category: m.category,
+      confidence: m.confidence || 0.92
+    }))
+  }
 
-  // 5. Clinical Decision Support: Drug Interaction Detection (Feature 27)
+  // 6. Clinical Decision Support: Drug Interaction Detection (Feature 27)
   const detectedInteractions = detectDrugInteractions(allMedications)
+
+  // 7. Merge symptoms and procedures
+  const allSymptoms = Array.from(new Set([
+    ...(docIntel.extractedData.symptoms || []),
+    ...(llamaExtraction?.symptoms || []),
+    ...(parsedBasic.symptoms || []).map(s => s.label),
+  ]))
+
+  const allProcedures = Array.from(new Set([
+    ...(docIntel.extractedData.procedures || []),
+    ...(llamaExtraction?.procedures || []),
+  ]))
 
   onProgress?.({ status: 'Complete!', progress: 100 })
 
   return {
     rawText,
-    documentType: docIntel.documentType,
-    documentCategory: docIntel.documentType,
+    documentType: llamaExtraction?.documentType || docIntel.documentType,
+    documentCategory: llamaExtraction?.documentType || docIntel.documentType,
     classificationConfidence: docIntel.classificationConfidence,
     documentDate: docIntel.documentDate,
     stampAndSignature: docIntel.stampAndSignature,
@@ -136,14 +211,22 @@ export async function scanMedicalDocument(imageSource, onProgress) {
       diagnosis: allDiagnoses,
       medications: allMedications,
       investigations: mergedInvestigations,
-      procedures: docIntel.extractedData.procedures,
-      symptoms: docIntel.extractedData.symptoms.length > 0 ? docIntel.extractedData.symptoms : parsedBasic.symptoms.map(s => s.label),
-      allergies: parsedBasic.allergies,
+      procedures: allProcedures,
+      symptoms: allSymptoms,
+      allergies: [
+        ...(parsedBasic.allergies || []),
+        ...(llamaExtraction?.allergies || []),
+      ],
     },
     drugInteractions: detectedInteractions,
-    symptoms: docIntel.extractedData.symptoms,
+    symptoms: allSymptoms,
     confidence: Math.max(confidence, docIntel.classificationConfidence),
     parsedAt: new Date().toISOString(),
+    // LLM-enhanced metadata
+    isLlmEnhanced: !!llamaExtraction,
+    plainLanguageSummary,
+    doctorInfo: llamaExtraction?.doctorInfo || null,
+    llamaDiagnoses: llamaExtraction?.diagnoses || null,
   }
 }
 

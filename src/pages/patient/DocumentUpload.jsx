@@ -319,6 +319,111 @@ export default function DocumentUpload() {
             })}
           </div>
 
+          {/* 1-Click Demo Preset Sample Scans for Hackathon */}
+          <div className="w-full bg-teal-50 border border-teal-200/80 rounded-2xl p-3 my-1">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-bold text-teal-800 font-mono uppercase tracking-wider flex items-center gap-1">
+                <span className="material-symbols-outlined text-[15px]">auto_awesome</span>
+                <span>1-Click Hackathon Sample Scans</span>
+              </span>
+              <span className="text-[10px] text-teal-600 font-semibold">Instant OCR</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const sampleDoc = {
+                    id: `doc-preset-1-${Date.now()}`,
+                    category: 'Prescription',
+                    fileName: 'Prescription_Metformin_Amlodipine.jpg',
+                    uploadDate: new Date().toISOString().split('T')[0],
+                    status: 'processed',
+                    previewUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBMJS-5H3OBXkDd5RVw5Y7fzvVpByxTAbS-7M5zIqah8dYh8X7aNOV1dT7ghIRnZJn0BHa1VAaCXGtKLusTjEyeWpOi6YPZirv1a7mp-tU61o5KJIc_dA0yW488TZPzP7HJ5Y-BovK5D4W9SXtcfSQEnW3vDdLbGu3p5mMNHSsJXEcz2xX_IF0oT-Lt7S8sYBKw_5EpxkNpzW3NFzjc1WZI9UfFSRauo99PoBisaa-ZQ-zS0YQyoKaI',
+                    extraction: {
+                      extractedData: {
+                        diagnoses: ['Essential Hypertension', 'Type 2 Diabetes Mellitus'],
+                        medications: [
+                          { name: 'Tab Metformin', dosage: '500 mg', frequency: '1-0-1 BD (After Meals)', duration: '30 days' },
+                          { name: 'Tab Amlodipine', dosage: '5 mg', frequency: '1-0-0 OD (Morning)', duration: '30 days' }
+                        ],
+                        investigations: [
+                          { test: 'HbA1c', value: '8.4', unit: '%', status: 'abnormal', direction: 'high', referenceRange: '4.0 - 5.6 %' }
+                        ]
+                      }
+                    }
+                  }
+                  const updated = [sampleDoc, ...documents]
+                  setDocuments(updated)
+                  try { localStorage.setItem('arogya_documents', JSON.stringify(updated)) } catch {}
+                }}
+                className="p-2 rounded-xl bg-white border border-teal-200 text-teal-900 font-bold text-[11px] hover:bg-teal-100 transition cursor-pointer flex flex-col items-center text-center shadow-2xs"
+              >
+                <span>💊 Prescription</span>
+                <span className="text-[9px] text-teal-600 font-normal">Metformin + HbA1c</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const sampleDoc = {
+                    id: `doc-preset-2-${Date.now()}`,
+                    category: 'Laboratory Report',
+                    fileName: 'Pathology_CBC_Lipid_Panel.pdf',
+                    uploadDate: new Date().toISOString().split('T')[0],
+                    status: 'processed',
+                    previewUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAUUaDFe2he3SNBA-vi1U-uuBvqbHMTDRYKT0jumAHdsGIfQTgGzwutxe5Hnc0cctWMdHs0XXZs5hnOHymHrAw2K6WR-lUhCIOt0xQNqZEx5DxrS2xZYfBpEpCh9dmf-Y9ZyZHf249PnfFjtSz4WzImFQ0Un-uEyyANS8NEC_vsH-uAbwFOYh3vsgi6OnslFE2BxzrTJG0uja9cKuOVHdjXrduBEGheB4FhWXTH6ciRPArgKc71c-bC',
+                    extraction: {
+                      extractedData: {
+                        diagnoses: ['Hyperlipidemia', 'Impaired Fasting Glycemia'],
+                        investigations: [
+                          { test: 'Total Cholesterol', value: '245', unit: 'mg/dL', status: 'abnormal', direction: 'high', referenceRange: '125 - 200 mg/dL' },
+                          { test: 'Fasting Blood Sugar', value: '142', unit: 'mg/dL', status: 'abnormal', direction: 'high', referenceRange: '70 - 99 mg/dL' }
+                        ]
+                      }
+                    }
+                  }
+                  const updated = [sampleDoc, ...documents]
+                  setDocuments(updated)
+                  try { localStorage.setItem('arogya_documents', JSON.stringify(updated)) } catch {}
+                }}
+                className="p-2 rounded-xl bg-white border border-teal-200 text-teal-900 font-bold text-[11px] hover:bg-teal-100 transition cursor-pointer flex flex-col items-center text-center shadow-2xs"
+              >
+                <span>🔬 Lab Report</span>
+                <span className="text-[9px] text-teal-600 font-normal">CBC + Lipid Panel</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const sampleDoc = {
+                    id: `doc-preset-3-${Date.now()}`,
+                    category: 'Prescription',
+                    fileName: 'Ayurvedic_Prakriti_Note.jpg',
+                    uploadDate: new Date().toISOString().split('T')[0],
+                    status: 'processed',
+                    previewUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAPFeKS063QjC1f_6kw3-0LX009yyfDSzXZ9okUlNibx7TL1A3ndy7-NyY7PLMp14h0YXoXQnVi2mm-3_u5STgV9T6KyxP4mXQj8xs-IfstABBfqvF8VWboEI5MWffYtJcSWvrCYpD6EP-z8x2O7bOdEEDmfu9zQtXKcWKS7prD8Oh9x1UQMpolKdM6pBBU2VZGHgCmWNZxsx7gs4wI2OE5SwfoDyQMN2X1RWjR4UK3I6-huapCkJA3',
+                    extraction: {
+                      extractedData: {
+                        diagnoses: ['Vata-Pitta Prakriti Imbalance', 'Agni Mandya'],
+                        medications: [
+                          { name: 'Triphala Churna', dosage: '5 g', frequency: 'Bedtime with warm water', duration: '15 days' },
+                          { name: 'Arjunarishta', dosage: '15 ml', frequency: 'Twice daily after meals', duration: '30 days' }
+                        ]
+                      }
+                    }
+                  }
+                  const updated = [sampleDoc, ...documents]
+                  setDocuments(updated)
+                  try { localStorage.setItem('arogya_documents', JSON.stringify(updated)) } catch {}
+                }}
+                className="p-2 rounded-xl bg-white border border-teal-200 text-teal-900 font-bold text-[11px] hover:bg-teal-100 transition cursor-pointer flex flex-col items-center text-center shadow-2xs"
+              >
+                <span>🍃 AYUSH Note</span>
+                <span className="text-[9px] text-teal-600 font-normal">Prakriti + Triphala</span>
+              </button>
+            </div>
+          </div>
+
           {/* Floating Translucent Dark Glass Dock */}
           <div className="w-full rounded-2xl bg-slate-900 text-white p-3.5 shadow-xl flex items-center justify-between relative mt-1 border border-slate-800">
             {/* Left Action: Scanned Pages Stack Preview */}

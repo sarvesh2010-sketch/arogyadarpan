@@ -1,7 +1,4 @@
-// ============================
-// ArogyaDarpan — Interactive AI Differential Diagnosis & ICD-10 Candidate Engine
-// Assists consulting physicians with ICD-10 codes, evidence rationales, and match probabilities
-// ============================
+import { generateLlamaDifferentialDiagnosis } from './llamaService.js'
 
 export function generateDifferentialDiagnosis(patientData = {}) {
   const responses = patientData.interviewResponses || []
@@ -71,3 +68,16 @@ export function generateDifferentialDiagnosis(patientData = {}) {
 
   return candidates.sort((a, b) => b.probability - a.probability)
 }
+
+/**
+ * Async Differential Generator that queries Llama LLM (Groq / Ollama)
+ * and falls back to deterministic rules if offline.
+ */
+export async function generateAsyncDifferentialDiagnosis(patientData = {}) {
+  const llamaResults = await generateLlamaDifferentialDiagnosis(patientData)
+  if (llamaResults && llamaResults.length > 0) {
+    return llamaResults
+  }
+  return generateDifferentialDiagnosis(patientData)
+}
+

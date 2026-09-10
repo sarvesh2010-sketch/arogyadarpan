@@ -43,6 +43,29 @@ export function prepareFHIRBundle(patientData = {}) {
   }
   entries.push(patientResource)
 
+  // 1b. Encounter Resource (OPD Visit Details)
+  const encounterId = generateUUID()
+  const encounterResource = {
+    fullUrl: encounterId,
+    resource: {
+      resourceType: 'Encounter',
+      id: 'encounter-opd-001',
+      status: 'in-progress',
+      class: {
+        system: 'http://terminology.hl7.org/CodeSystem/v3-ActCode',
+        code: 'AMB',
+        display: 'ambulatory (OPD Visit)',
+      },
+      subject: { reference: patientId },
+      serviceType: {
+        coding: [{ system: 'http://snomed.info/sct', code: '310000008', display: 'General Medicine Service' }],
+        text: patientData.consultation?.department || 'General Medicine OPD',
+      },
+      period: { start: timestamp },
+    },
+  }
+  entries.push(encounterResource)
+
   // 2. Condition Resource (Chief Complaint)
   const conditionResource = {
     fullUrl: conditionId,
@@ -54,6 +77,7 @@ export function prepareFHIRBundle(patientData = {}) {
         text: patientData.consultation?.chiefComplaintText || summary.chiefComplaint || 'Clinical consultation',
       },
       subject: { reference: patientId },
+      encounter: { reference: encounterId },
       clinicalStatus: {
         coding: [{ system: 'http://terminology.hl7.org/CodeSystem/condition-clinical', code: 'active' }],
       },

@@ -1,23 +1,83 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
-  CheckCircle2, ArrowRight, RefreshCw, QrCode, Clock, Sparkles
+  CheckCircle2, ArrowRight, RefreshCw, QrCode, Sparkles, Loader2, Globe, FileText
 } from 'lucide-react'
 import StitchAppHeader from '../../components/StitchAppHeader'
 import { clearPatientSession, getActivePatient } from '../../services/sessionStore'
+import { generateAsyncLlamaHPI } from '../../services/hpiEngine'
 import { useLanguage } from '../../context/LanguageContext'
 
 export default function CompletionScreen() {
   const navigate = useNavigate()
   const { t } = useLanguage()
   const patient = getActivePatient()
+
   const [showQrModal, setShowQrModal] = useState(false)
+  const [llamaSummary, setLlamaSummary] = useState(null)
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(true)
+  const [summaryError, setSummaryError] = useState(false)
+  const [showHindiSummary, setShowHindiSummary] = useState(false)
+
+  // On mount: trigger Groq LLM 8-part clinical summary generation
+  useEffect(() => {
+    let cancelled = false
+
+    const generateSummary = async () => {
+      setIsGeneratingSummary(true)
+      setSummaryError(false)
+
+      try {
+        const responses = patient?.interviewResponses || []
+        const demographics = {
+          name: patient?.name || 'Patient',
+          age: patient?.age || '',
+          gender: patient?.gender || '',
+          abhaId: patient?.abhaId || '',
+        }
+        const documents = patient?.documents || []
+
+        const result = await generateAsyncLlamaHPI(responses, demographics, documents)
+
+        if (!cancelled && result) {
+          setLlamaSummary(result)
+        } else if (!cancelled) {
+          setSummaryError(true)
+        }
+      } catch (err) {
+        console.warn('LLM summary generation failed:', err)
+        if (!cancelled) setSummaryError(true)
+      } finally {
+        if (!cancelled) setIsGeneratingSummary(false)
+      }
+    }
+
+    generateSummary()
+    return () => { cancelled = true }
+  }, [])
 
   const handleStartNew = () => {
     clearPatientSession()
     navigate('/patient/language')
   }
+
+  const clinicalSummary = llamaSummary?.llamaSummary || null
+
+  const rawCc = clinicalSummary?.chiefComplaint || llamaSummary?.structured?.chiefComplaint || 'Clinical Consultation'
+  const chiefComplaint = (rawCc.toLowerCase().includes('not provided') || rawCc.toLowerCase().includes('none'))
+    ? (llamaSummary?.structured?.chiefComplaint || 'Clinical Consultation')
+    : rawCc
+
+  const rawEn = clinicalSummary?.bilingualPatientSummaryEn || clinicalSummary?.hpi || llamaSummary?.narrativeProse || ''
+  const narrativeEn = (!rawEn || rawEn.toLowerCase().includes('no complaint') || rawEn.toLowerCase().includes('not provided'))
+    ? (llamaSummary?.narrativeProse || 'Patient presented for clinical intake consultation. Symptoms synthesized and ready for physician evaluation.')
+    : rawEn
+
+  const rawHi = clinicalSummary?.bilingualPatientSummaryHi || llamaSummary?.hindiNarrative || ''
+  const narrativeHi = (!rawHi || rawHi.toLowerCase().includes('कोई शिकायत') || rawHi.toLowerCase().includes('उपलब्ध नहीं'))
+    ? (llamaSummary?.hindiNarrative || 'मरीज परामर्श और स्वास्थ्य मूल्यांकन के लिए उपस्थित हुए। लक्षण दर्ज कर लिए गए हैं।')
+    : rawHi
 
   return (
     <div className="min-h-screen bg-[#f7f9fb] text-slate-900 flex flex-col select-none pb-28 pb-safe">
@@ -48,14 +108,126 @@ export default function CompletionScreen() {
             </div>
 
             <h1 className="font-heading text-2xl sm:text-3xl text-slate-900 tracking-tight font-bold">
-              You Are All Set, {patient.name || 'Rahul'}!
+              You Are All Set, {patient?.name || 'Rahul'}!
             </h1>
             <span className="text-xs text-teal-800 font-semibold mt-0.5">
               आपकी तैयारी पूरी हो गई है
             </span>
             <p className="text-xs text-slate-600 mt-1 max-w-[340px] leading-relaxed">
-              Your complete bilingual clinical summary is already synced with Dr. Ananya Sharma’s workstation tablet.
+              Your complete bilingual clinical summary is already synced with Dr. Ananya Sharma's workstation tablet.
             </p>
+          </div>
+
+          {/* ✨ AI Clinical Summary Card */}
+          <div className="rounded-2xl bg-white border border-slate-200/80 shadow-xs overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-teal-50 to-emerald-50">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-teal-700" />
+                <span className="font-heading font-bold text-xs text-teal-900">
+                  AI-Generated Clinical Summary
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {!isGeneratingSummary && narrativeHi && (
+                  <button
+                    type="button"
+                    onClick={() => setShowHindiSummary(v => !v)}
+                    className="flex items-center gap-1 px-2 py-1 rounded-lg bg-teal-100 hover:bg-teal-200 text-teal-800 text-[10px] font-bold transition cursor-pointer"
+                  >
+                    <Globe className="w-3 h-3" />
+                    {showHindiSummary ? 'EN' : 'हिंदी'}
+                  </button>
+                )}
+                {llamaSummary?.isLlamaGenerated && (
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 border border-teal-200">
+                    ⚡ Groq AI
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4">
+              {isGeneratingSummary ? (
+                <div className="flex flex-col items-center py-4 text-center gap-3">
+                  <div className="relative">
+                    <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center">
+                      <Loader2 className="w-5 h-5 text-teal-600 animate-spin" />
+                    </div>
+                    <div className="absolute inset-0 rounded-full bg-teal-400/20 animate-ping" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">🧠 Generating AI Clinical Summary...</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Groq LLM is synthesizing your 8-part SIH summary</p>
+                  </div>
+                </div>
+              ) : summaryError ? (
+                <div className="py-3 text-center">
+                  <p className="text-xs text-slate-500">Summary will be available on the Doctor's Dashboard</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {/* Chief Complaint */}
+                  {chiefComplaint && (
+                    <div className="bg-teal-50/60 rounded-xl p-3 border border-teal-100">
+                      <p className="text-[10px] font-bold text-teal-800 uppercase tracking-wider mb-1">Chief Complaint</p>
+                      <p className="text-sm font-semibold text-slate-900">{chiefComplaint}</p>
+                    </div>
+                  )}
+
+                  {/* Bilingual Summary Narrative */}
+                  <AnimatePresence mode="wait">
+                    {showHindiSummary && narrativeHi ? (
+                      <motion.div
+                        key="hindi"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        className="bg-amber-50/60 rounded-xl p-3 border border-amber-100"
+                      >
+                        <p className="text-[10px] font-bold text-amber-800 uppercase tracking-wider mb-1">
+                          🇮🇳 रोगी सारांश (हिंदी में)
+                        </p>
+                        <p className="text-sm text-slate-800 leading-relaxed">{narrativeHi}</p>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="english"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        className="bg-slate-50/60 rounded-xl p-3 border border-slate-100"
+                      >
+                        <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1">
+                          Clinical HPI Narrative
+                        </p>
+                        <p className="text-sm text-slate-700 leading-relaxed">
+                          {narrativeEn || 'Your clinical intake summary has been generated and synced to the doctor dashboard.'}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Medications from Summary */}
+                  {clinicalSummary?.medications?.length > 0 && (
+                    <div className="rounded-xl border border-slate-100 overflow-hidden">
+                      <div className="px-3 py-2 bg-slate-50 border-b border-slate-100">
+                        <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+                          Current Medications (from Records)
+                        </p>
+                      </div>
+                      <div className="divide-y divide-slate-50">
+                        {clinicalSummary.medications.slice(0, 3).map((med, i) => (
+                          <div key={i} className="px-3 py-2 flex items-center justify-between">
+                            <span className="text-xs font-semibold text-slate-800">{med.name}</span>
+                            <span className="text-[10px] text-slate-500">{med.frequency || med.dosage}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Hero Digital Clinic Token Pass (Skeuomorphic Boarding Pass Style) */}
@@ -105,17 +277,13 @@ export default function CompletionScreen() {
 
             {/* Skeuomorphic Perforated Tear Notch & Dashed Line */}
             <div className="relative w-full flex items-center justify-between py-1 bg-transparent">
-              {/* Left Notch Hole */}
               <div className="w-5 h-7 rounded-r-full bg-[#f7f9fb] shadow-inner -ml-0.5 border-r border-t border-b border-slate-200/60" />
-              {/* Dashed Perforation Line */}
               <div className="flex-1 border-t-2 border-dashed border-slate-300 mx-2 opacity-60" />
-              {/* Right Notch Hole */}
               <div className="w-5 h-7 rounded-l-full bg-[#f7f9fb] shadow-inner -mr-0.5 border-l border-t border-b border-slate-200/60" />
             </div>
 
             {/* Lower Pass Segment: Live Queue Tracker */}
             <div className="p-4 pt-2 bg-gradient-to-b from-white to-slate-50/60">
-              {/* Real-time telemetry banner */}
               <div className="flex items-center justify-between mb-3">
                 <div className="flex flex-col">
                   <span className="text-xs text-slate-500">Currently In Consultation</span>
@@ -145,12 +313,10 @@ export default function CompletionScreen() {
                   <span className="font-mono text-[10px] text-slate-400 font-bold">ABDM TELEMETRY</span>
                 </div>
 
-                {/* Animated Progress Runway */}
                 <div className="relative w-full h-2.5 bg-slate-200 rounded-full overflow-hidden flex items-center">
                   <div className="absolute left-0 top-0 h-full bg-gradient-to-r from-cyan-400 via-teal-600 to-[#00855b] w-3/4 rounded-full transition-all duration-700" />
                 </div>
 
-                {/* Checkpoints Along Runway */}
                 <div className="flex justify-between items-center mt-3 text-center">
                   <div className="flex flex-col items-center">
                     <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-mono text-[10px] font-semibold">#12</span>
@@ -180,43 +346,6 @@ export default function CompletionScreen() {
             </div>
           </div>
 
-          {/* What Happens Next Guide */}
-          <div className="flex flex-col space-y-2 pt-1">
-            <div className="flex items-center justify-between px-1">
-              <h2 className="font-heading text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-teal-700 text-[18px]">checklist</span>
-                What to Expect Next
-              </h2>
-              <span className="font-mono text-[10px] text-teal-800 bg-emerald-50 px-2 py-0.5 rounded-full font-bold border border-emerald-200/60">
-                Step-by-Step
-              </span>
-            </div>
-
-            <div className="p-3 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-start gap-3">
-              <div className="w-7 h-7 rounded-full bg-slate-100 text-teal-800 font-mono text-xs flex items-center justify-center shrink-0 font-bold">
-                1
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-heading font-bold text-xs text-slate-900">Relax in the OPD Waiting Lobby</div>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Take a comfortable seat in Waiting Lounge B outside OPD Room 204.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-start gap-3">
-              <div className="w-7 h-7 rounded-full bg-teal-50 text-teal-800 font-mono text-xs flex items-center justify-center shrink-0 font-bold border border-teal-200/60">
-                2
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-heading font-bold text-xs text-slate-900">Digital Call Announcement</div>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Token #A-14 will chime across the overhead display when Dr. Sharma is ready.
-                </p>
-              </div>
-            </div>
-          </div>
-
           {/* ABDM Health Pass Export Action */}
           <button
             type="button"
@@ -231,7 +360,7 @@ export default function CompletionScreen() {
           <div className="p-4 rounded-2xl bg-gradient-to-r from-teal-900 to-slate-900 text-white shadow-md flex items-center justify-between gap-3">
             <div>
               <p className="text-[10px] font-bold font-mono text-teal-300 tracking-wider uppercase">FOR JUDGES & DOCTOR REVIEW</p>
-              <p className="text-xs text-slate-300">Inspect Rahul Sharma in the Doctor Clinical Decision Station</p>
+              <p className="text-xs text-slate-300">Inspect {patient?.name || 'patient'} in the Doctor Clinical Decision Station</p>
             </div>
             <button
               type="button"
@@ -273,14 +402,14 @@ export default function CompletionScreen() {
 
             <div className="w-48 h-48 mx-auto bg-slate-50 rounded-2xl p-3 border-2 border-dashed border-teal-500/40 flex items-center justify-center">
               <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=ABDM-FHIR-BUNDLE-TOKEN-A14-${patient.patientId || 'P10024'}`}
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=ABDM-FHIR-BUNDLE-TOKEN-A14-${patient?.patientId || 'P10024'}`}
                 alt="ABDM FHIR QR Code"
                 className="w-full h-full object-contain"
               />
             </div>
 
             <p className="font-mono text-xs font-bold text-teal-800">
-              ABHA: {patient.abhaId || '91-8842-1920-4491'}
+              ABHA: {patient?.abhaId || '91-8842-1920-4491'}
             </p>
             <p className="text-xs text-slate-500">
               Scan with any ABDM PHR app (Aarogya Setu, ABHA App) to import this encrypted clinical intake bundle.

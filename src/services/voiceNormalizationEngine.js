@@ -1,3 +1,5 @@
+import { normalizeVoiceWithLlama } from './llamaService.js'
+
 // ============================
 // ArogyaDarpan — Multilingual Voice Normalization Engine
 // Normalizes spoken audio (English, Hindi, Hinglish, regional) into structured question answers
@@ -175,3 +177,66 @@ export function normalizeVoiceInput(transcript, question) {
     matchedOption: null
   }
 }
+
+/**
+ * Async LLM-powered voice transcript normalizer
+ * Converts raw Hinglish/regional transcripts into clean clinical text via Groq LLM
+ * 
+ * @param {string} rawTranscript - Spoken transcript
+ * @param {string} lang - Language ('hi' | 'en' | 'pa')
+ * @returns {Promise<Object|null>} Normalized text object with medical terms or null
+ */
+export async function normalizeWithLlama(rawTranscript, lang = 'hi') {
+  if (!rawTranscript || rawTranscript.trim().length < 3) return null
+
+  try {
+    const result = await normalizeVoiceWithLlama(rawTranscript, lang)
+    if (result && (result.normalizedTextEn || result.normalizedTextHi)) {
+      return {
+        ...result,
+        isLlmGenerated: true,
+      }
+    }
+  } catch (err) {
+    console.warn('Groq voice transcript normalization failed:', err)
+  }
+
+  return null
+}
+
+/**
+ * Async LLM-powered voice normalization wrapper that attempts LLM normalization first,
+ * falling back to rule-based normalizeVoiceInput.
+ * 
+ * @param {string} transcript - Spoken transcript
+ * @param {Object} question - Question object
+ * @param {string} lang - Active language
+ * @returns {Promise<Object>} Normalized result object
+ */
+export async function normalizeVoiceInputWithLlama(transcript, question, lang = 'hi') {
+  if (!transcript || !question) return null
+
+  // 1. Attempt LLM normalization
+  try {
+    const llmNorm = await normalizeWithLlama(transcript, lang)
+    if (llmNorm && llmNorm.normalizedTextEn) {
+      // Run normalized text through rule matcher for precise question option matching
+      const matched = normalizeVoiceInput(llmNorm.normalizedTextEn, question)
+      if (matched && matched.matchedOption) {
+        return {
+          ...matched,
+          normalizedTextEn: llmNorm.normalizedTextEn,
+          normalizedTextHi: llmNorm.normalizedTextHi,
+          medicalTermsFound: llmNorm.medicalTermsFound || [],
+          isLlmGenerated: true,
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('LLM voice input normalization error:', err)
+  }
+
+  // 2. Fallback to standard rule-based matcher
+  return normalizeVoiceInput(transcript, question)
+}
+

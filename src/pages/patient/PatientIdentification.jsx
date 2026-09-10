@@ -144,9 +144,27 @@ export default function PatientIdentification() {
     }
   }
 
-  // Handle Verify & Fetch ABDM Records
+  // ABHA OTP Verification state
+  const [showOtpModal, setShowOtpModal] = useState(false)
+  const [otpInput, setOtpInput] = useState('')
+  const [otpError, setOtpError] = useState('')
+
+  // Trigger ABHA OTP prompt
+  const handleStartAbhaVerify = () => {
+    setOtpInput('')
+    setOtpError('')
+    setShowOtpModal(true)
+  }
+
+  // Handle Verify & Fetch ABDM Records after OTP
   const handleVerifyAbhaAndProceed = () => {
+    if (otpInput.trim() !== '123456' && otpInput.trim() !== '') {
+      setOtpError('Invalid OTP. Use demo OTP: 123456')
+      return
+    }
+
     setIsVerifyingAbha(true)
+    setShowOtpModal(false)
 
     const patientProfile =
       selectedProfile === 'rahul'
@@ -793,7 +811,7 @@ export default function PatientIdentification() {
         {activeTab === 'abha' && (
           <div className="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto px-4 pt-3 pb-safe bg-gradient-to-t from-[#f7f9fb] via-[#f7f9fb]/95 to-transparent z-40">
             <button
-              onClick={handleVerifyAbhaAndProceed}
+              onClick={handleStartAbhaVerify}
               disabled={isVerifyingAbha}
               className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-heading font-bold text-sm sm:text-base shadow-teal-glow active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
@@ -818,6 +836,71 @@ export default function PatientIdentification() {
           </div>
         )}
       </main>
+
+      {/* ABHA OTP Verification Modal */}
+      {showOtpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in select-none">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full border border-slate-200 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="size-5 text-teal-700" />
+                <span className="font-heading font-bold text-sm text-slate-900">ABDM ABHA Consent OTP</span>
+              </div>
+              <button
+                onClick={() => setShowOtpModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-xs cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600">
+              A 6-digit verification code has been sent to the Aadhaar-linked phone for <strong className="text-slate-900">{abhaInput}</strong>.
+            </p>
+
+            <div className="p-3 bg-teal-50 rounded-2xl border border-teal-200 text-center">
+              <span className="text-[11px] text-teal-800 font-bold block mb-1">DEMO HACKATHON PASSCODE</span>
+              <span className="font-mono text-xl font-extrabold text-teal-900 tracking-widest">123456</span>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-700 block mb-1">Enter 6-Digit OTP</label>
+              <input
+                type="text"
+                maxLength={6}
+                value={otpInput}
+                onChange={(e) => {
+                  setOtpInput(e.target.value)
+                  setOtpError('')
+                }}
+                placeholder="123456"
+                className="w-full px-4 py-3 rounded-xl border border-slate-300 font-mono text-center text-lg font-bold tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-600"
+              />
+              {otpError && (
+                <p className="text-[11px] text-rose-600 font-semibold mt-1">{otpError}</p>
+              )}
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowOtpModal(false)}
+                className="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleVerifyAbhaAndProceed}
+                className="flex-1 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-xs cursor-pointer flex items-center justify-center gap-1"
+              >
+                <span>Verify OTP</span>
+                <ArrowRight className="size-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

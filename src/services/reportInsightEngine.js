@@ -3,6 +3,8 @@
 // Explains what medical reports say in plain language and outlines medical/treatment insights
 // ============================
 
+import { generateLlamaReportInsights } from './llamaService.js'
+
 /**
  * Generate intelligent clinical & plain-language insights for any medical report / extraction
  * @param {Object} documentData - OCR document extraction or lab result object
@@ -206,3 +208,35 @@ export function generateReportInsights(documentData = {}) {
     generatedAt: new Date().toISOString(),
   }
 }
+
+/**
+ * Async LLM-powered Report Insights generator with rule-engine fallback
+ * @param {Object} documentData - OCR document extraction or lab result object
+ * @returns {Promise<Object>} Report insights (LLM-enhanced or fallback rule-based)
+ */
+export async function generateReportInsightsWithLlama(documentData = {}) {
+  try {
+    const llmResult = await generateLlamaReportInsights(documentData)
+    if (llmResult && (llmResult.insights?.length > 0 || llmResult.overallSummaryEn)) {
+      return {
+        insights: llmResult.insights || [],
+        curativeMedicines: llmResult.curativeMedicines || [],
+        ayushRecommendations: llmResult.ayushRecommendations || [],
+        overallSummaryEn: llmResult.overallSummaryEn || '',
+        overallSummaryHi: llmResult.overallSummaryHi || '',
+        generatedAt: new Date().toISOString(),
+        isLlmGenerated: true,
+      }
+    }
+  } catch (err) {
+    console.warn('Groq API report insights failed, using rule engine fallback:', err)
+  }
+
+  // Fallback to rule engine
+  const syncResult = generateReportInsights(documentData)
+  return {
+    ...syncResult,
+    isLlmGenerated: false,
+  }
+}
+

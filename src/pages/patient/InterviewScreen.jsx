@@ -188,37 +188,61 @@ export default function InterviewScreen() {
   const handleApplyConversationalIntake = (intakeData) => {
     if (!intakeData) return
 
-    // 1. Primary complaint
-    if (intakeData.primaryComplaint?.id) {
-      submitResponse('chief_complaint', intakeData.rawTranscript, intakeData.primaryComplaint.id, 'voice')
+    const entities = intakeData.accumulatedEntities || intakeData.extractedEntities || intakeData
+
+    // 1. Primary / Chief Complaint
+    const cc = entities.chiefComplaint || intakeData.primaryComplaint?.id || intakeData.primaryComplaint?.label || intakeData.chiefComplaint
+    if (cc) {
+      submitResponse('chief_complaint', String(cc), String(cc), 'voice')
     }
 
     // 2. Duration / Onset
-    if (intakeData.duration) {
-      submitResponse('socrates_onset', intakeData.duration, intakeData.duration, 'voice')
+    const dur = entities.duration || intakeData.duration
+    if (dur) {
+      submitResponse('socrates_onset', String(dur), String(dur), 'voice')
     }
 
     // 3. Associated symptoms
-    if (intakeData.associatedSymptoms && intakeData.associatedSymptoms.length > 0) {
-      const symVals = intakeData.associatedSymptoms.map(s => s.id)
-      submitResponse('socrates_associations', intakeData.associatedSymptoms.map(s => s.label).join(', '), symVals, 'voice')
+    const assoc = entities.associatedFactors || entities.symptoms || intakeData.associatedSymptoms
+    if (assoc) {
+      const assocStr = Array.isArray(assoc)
+        ? assoc.map(s => typeof s === 'string' ? s : s.label || s.id).join(', ')
+        : String(assoc)
+      submitResponse('socrates_associations', assocStr, assocStr, 'voice')
     }
 
-    // 4. Severity
-    if (intakeData.severity) {
-      submitResponse('socrates_severity', String(intakeData.severity), intakeData.severity, 'voice')
+    // 4. Severity Score
+    const sev = entities.severityScore || entities.severity || intakeData.severity
+    if (sev) {
+      submitResponse('socrates_severity', String(sev), String(sev), 'voice')
     }
 
-    // 5. Current medications if detected
-    if (intakeData.medications && intakeData.medications.length > 0) {
-      const medStr = intakeData.medications.map(m => `${m.medication} ${m.dose || ''}`).join(', ')
+    // 5. Site / Location
+    if (entities.site) {
+      submitResponse('socrates_site', String(entities.site), String(entities.site), 'voice')
+    }
+
+    // 6. Character
+    if (entities.character) {
+      submitResponse('socrates_character', String(entities.character), String(entities.character), 'voice')
+    }
+
+    // 7. Current medications if detected
+    const meds = entities.medications || intakeData.medications
+    if (meds && meds.length > 0) {
+      const medStr = Array.isArray(meds)
+        ? meds.map(m => typeof m === 'string' ? m : `${m.name || m.medication} ${m.dose || m.strength || ''}`).join(', ')
+        : String(meds)
       submitResponse('current_medications', medStr, medStr, 'voice')
     }
 
-    // 6. Diseases if detected
-    if (intakeData.diseases && intakeData.diseases.length > 0) {
-      const disList = intakeData.diseases.map(d => d.name)
-      submitResponse('past_medical', disList.join(', '), disList, 'voice')
+    // 8. Past Diseases if detected
+    const dis = entities.diseases || intakeData.diseases
+    if (dis && dis.length > 0) {
+      const disStr = Array.isArray(dis)
+        ? dis.map(d => typeof d === 'string' ? d : d.disease || d.name).join(', ')
+        : String(dis)
+      submitResponse('past_medical', disStr, disStr, 'voice')
     }
 
     setShowConversationalModal(false)
@@ -418,20 +442,51 @@ export default function InterviewScreen() {
 
               <div className="flex items-center gap-2">
                 <button
+                  onClick={() => setShowConversationalModal(true)}
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-600 via-emerald-600 to-cyan-600 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer animate-pulse"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>AI Voice Intake (Groq)</span>
+                </button>
+                <button
                   onClick={() => setShowFullForm(!showFullForm)}
                   className="glass-pill px-3 py-1.5 text-xs font-bold text-cobalt border border-slate-200 hover:bg-slate-50 transition cursor-pointer"
                 >
                   {showFullForm ? 'Step View' : 'Full Form'}
                 </button>
-                <button
-                  onClick={() => setIsLowLiteracy(!isLowLiteracy)}
-                  className={`glass-pill px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
-                    isLowLiteracy ? 'bg-amber text-slate-900' : 'text-slate-600 border border-slate-200'
-                  }`}
-                >
-                  {isLowLiteracy ? '☀️ Large Font ON' : '☀️ Large Font'}
-                </button>
               </div>
+            </div>
+
+            {/* Conversational AI Voice Intake Hero Card */}
+            <div className="mb-4 p-4 rounded-2xl bg-gradient-to-br from-teal-900 via-slate-900 to-cyan-950 text-white shadow-xl border border-teal-500/30 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-teal-500/20 border border-teal-400/40 flex items-center justify-center text-teal-300 flex-shrink-0">
+                  <Sparkles className="w-6 h-6 animate-spin-slow" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-heading font-extrabold text-sm sm:text-base text-white">
+                      {lang === 'hi' ? 'बोलकर बताएं — AI सवाल पूछेगा' : 'Talk Naturally — Groq AI Intakes Symptoms'}
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[10px] font-bold border border-emerald-500/30">
+                      ⚡ Groq AI Connected
+                    </span>
+                  </div>
+                  <p className="text-xs text-teal-200/80 mt-0.5">
+                    {lang === 'hi'
+                      ? 'अपनी भाषा में खुलकर बताएं (हिंदी, English, Hinglish). AI आपकी बात समझेगा और सवाल पूछेगा।'
+                      : 'Speak freely in any language. AI understands your symptoms and asks adaptive follow-ups.'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowConversationalModal(true)}
+                className="px-4 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs transition-all shadow-lg flex items-center gap-1.5 flex-shrink-0 cursor-pointer"
+              >
+                <span>{lang === 'hi' ? 'बातचीत शुरू करें' : 'Start Voice Chat'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
 
             {/* FULL FORM VIEW OVERLAY */}

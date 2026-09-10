@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { DEMO_PATIENTS, DEMO_DOCTOR } from '../../data/demoPatients'
 import ConnectionStatus from '../../components/ConnectionStatus'
+import { getAllDoctorPatients } from '../../services/sessionStore'
 
 const fadeIn = {
   hidden: { opacity: 0, y: 15 },
@@ -28,21 +29,23 @@ export default function DoctorDashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterPriority, setFilterPriority] = useState('all')
 
+  const allPatients = getAllDoctorPatients(DEMO_PATIENTS)
+
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
-  const priorityCount = DEMO_PATIENTS.filter(p =>
+  const priorityCount = allPatients.filter(p =>
     p.clinicalSignals.some(s => s.severity === 'critical' || s.severity === 'high')
   ).length
-  const readyCount = DEMO_PATIENTS.filter(p =>
+  const readyCount = allPatients.filter(p =>
     p.consultation.status === 'ready_for_review'
   ).length
-  const reviewCount = DEMO_PATIENTS.filter(p =>
+  const reviewCount = allPatients.filter(p =>
     p.consultation.status === 'needs_verification'
   ).length
 
   // Filter patients based on query and status filter
-  const filteredPatients = DEMO_PATIENTS.filter(patient => {
+  const filteredPatients = allPatients.filter(patient => {
     const matchesSearch = patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           patient.consultation.chiefComplaintText.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           patient.phone.includes(searchQuery)
