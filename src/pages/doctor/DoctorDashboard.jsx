@@ -6,9 +6,16 @@ import {
   ChevronRight, Heart, LogOut, Search, Filter,
   Activity, Shield, Stethoscope, Sparkles
 } from 'lucide-react'
-import { DEMO_PATIENTS, DEMO_DOCTOR } from '../../data/demoPatients'
+import { DEMO_PATIENTS } from '../../data/demoPatients'
 import ConnectionStatus from '../../components/ConnectionStatus'
-import { getAllDoctorPatients } from '../../services/sessionStore'
+import {
+  getAllDoctorPatients,
+  getActiveDoctor,
+  saveActiveDoctor,
+  AVAILABLE_DOCTORS,
+  searchPatientByAbhaOrId
+} from '../../services/sessionStore'
+import { UserCheck, ShieldCheck, ArrowRight, UserPlus, X } from 'lucide-react'
 
 const fadeIn = {
   hidden: { opacity: 0, y: 15 },
@@ -28,6 +35,18 @@ export default function DoctorDashboard() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const [filterPriority, setFilterPriority] = useState('all')
+
+  // Dynamic Doctor Profile & Switcher State
+  const [activeDoctor, setActiveDoctor] = useState(() => getActiveDoctor())
+  const [showDoctorModal, setShowDoctorModal] = useState(false)
+  const [customDoctorName, setCustomDoctorName] = useState('')
+  const [customSpecialty, setCustomSpecialty] = useState('')
+  const [customHprId, setCustomHprId] = useState('')
+
+  // ABHA ID Lookup State
+  const [abhaSearchInput, setAbhaSearchInput] = useState('')
+  const [abhaSearchResult, setAbhaSearchResult] = useState(null)
+  const [abhaSearchAttempted, setAbhaSearchAttempted] = useState(false)
 
   const allPatients = getAllDoctorPatients(DEMO_PATIENTS)
 
@@ -91,11 +110,18 @@ export default function DoctorDashboard() {
           <div className="flex items-center gap-3">
             <ConnectionStatus />
             <div className="h-6 w-px bg-slate-200 hidden sm:block" />
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/70 text-xs">
+            <button
+              type="button"
+              onClick={() => setShowDoctorModal(true)}
+              className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs transition cursor-pointer"
+            >
               <div className="size-2 rounded-full bg-emerald animate-ping" />
-              <span className="font-bold text-slate-700">{DEMO_DOCTOR.name}</span>
-              <span className="text-[10px] text-slate-400">({DEMO_DOCTOR.specialty})</span>
-            </div>
+              <div className="text-left">
+                <span className="font-bold text-slate-800 block leading-tight">{activeDoctor.name}</span>
+                <span className="text-[10px] text-slate-500 font-mono block">{activeDoctor.specialty} • {activeDoctor.hprId}</span>
+              </div>
+              <Sparkles className="size-3 text-cobalt ml-1" />
+            </button>
             <button
               onClick={() => navigate('/')}
               className="glass-pill p-2 text-slate-500 hover:text-coral hover:border-coral/40 transition cursor-pointer"
@@ -112,22 +138,170 @@ export default function DoctorDashboard() {
           {/* Welcome & Queue Header */}
           <motion.div custom={0} variants={fadeIn} className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h1 className="font-heading text-3xl font-extrabold text-slate-900">
-                {greeting}, {DEMO_DOCTOR.name}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="font-heading text-3xl font-extrabold text-slate-900">
+                  {greeting}, {activeDoctor.name}
+                </h1>
+                <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 font-mono text-xs font-bold border border-emerald-200">
+                  {activeDoctor.hprId}
+                </span>
+              </div>
               <p className="text-xs text-slate-500 font-medium mt-1 flex items-center gap-1.5">
                 <Users className="size-4 text-cobalt" />
-                Active Consultation Stream: <strong className="text-slate-800">{DEMO_PATIENTS.length} Patients</strong> registered today
+                Active Consultation Stream: <strong className="text-slate-800">{allPatients.length} Patients</strong> in queue • {activeDoctor.hospital}
               </p>
             </div>
 
-            <button
-              onClick={() => navigate('/kiosk')}
-              className="glass-pill px-4 py-2 text-xs font-bold text-cobalt border border-cobalt/30 hover:bg-cobalt-soft transition cursor-pointer flex items-center gap-1.5 shadow-xs"
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowDoctorModal(true)}
+                className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition shadow-md flex items-center gap-1.5 cursor-pointer"
+              >
+                <UserCheck className="size-4 text-emerald-400" />
+                <span>Switch Physician ({activeDoctor.name.split(' ')[1] || activeDoctor.name})</span>
+              </button>
+
+              <button
+                onClick={() => navigate('/kiosk')}
+                className="glass-pill px-4 py-2 text-xs font-bold text-cobalt border border-cobalt/30 hover:bg-cobalt-soft transition cursor-pointer flex items-center gap-1.5 shadow-xs"
+              >
+                <Activity className="size-3.5" />
+                <span>Switch to Kiosk View</span>
+              </button>
+            </div>
+          </motion.div>
+
+          {/* 🔍 UNIVERSAL ABHA ID PATIENT SEARCH HERO BAR */}
+          <motion.div custom={0.3} variants={fadeIn} className="glass-card p-4 sm:p-5 bg-gradient-to-r from-slate-900 via-cobalt-deep to-slate-900 text-white rounded-3xl shadow-xl border border-cobalt/30">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-cobalt/30 border border-cobalt/40 flex items-center justify-center text-teal-300">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-heading font-extrabold text-sm sm:text-base text-white flex items-center gap-2">
+                    Universal ABHA ID Patient Lookup
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[10px] font-bold border border-emerald-500/30">
+                      ABDM Linked
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-300">
+                    Any physician can enter a patient's ABHA ID, Health ID, or Mobile number to retrieve complete clinical history.
+                  </p>
+                </div>
+              </div>
+
+              {/* Quick Preset ABHA Search Chips */}
+              <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                <span className="text-slate-400 text-[11px] font-bold">Try Sample ABHA:</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAbhaSearchInput('ABHA-1234-5678')
+                    setAbhaSearchResult(searchPatientByAbhaOrId('ABHA-1234-5678'))
+                    setAbhaSearchAttempted(true)
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-teal-200 font-mono text-[11px] font-bold border border-white/20 transition cursor-pointer"
+                >
+                  ABHA-1234-5678 (Rahul)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAbhaSearchInput('91-8842-1920-4491')
+                    setAbhaSearchResult(searchPatientByAbhaOrId('91-8842-1920-4491'))
+                    setAbhaSearchAttempted(true)
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-teal-200 font-mono text-[11px] font-bold border border-white/20 transition cursor-pointer"
+                >
+                  91-8842-1920-4491 (ABDM)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAbhaSearchInput('ABHA-5678-9012')
+                    setAbhaSearchResult(searchPatientByAbhaOrId('ABHA-5678-9012'))
+                    setAbhaSearchAttempted(true)
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-teal-200 font-mono text-[11px] font-bold border border-white/20 transition cursor-pointer"
+                >
+                  ABHA-5678-9012 (Sunita)
+                </button>
+              </div>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                setAbhaSearchAttempted(true)
+                const res = searchPatientByAbhaOrId(abhaSearchInput)
+                setAbhaSearchResult(res)
+              }}
+              className="flex items-center gap-2"
             >
-              <Activity className="size-3.5" />
-              <span>Switch to Kiosk View</span>
-            </button>
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={abhaSearchInput}
+                  onChange={(e) => {
+                    setAbhaSearchInput(e.target.value)
+                    if (e.target.value.length > 2) {
+                      setAbhaSearchResult(searchPatientByAbhaOrId(e.target.value))
+                    } else {
+                      setAbhaSearchResult(null)
+                    }
+                  }}
+                  placeholder="Enter Patient ABHA Address, 14-digit ABHA Number, Mobile, or Patient ID..."
+                  className="w-full bg-white/10 text-white placeholder-slate-400 font-medium text-xs sm:text-sm pl-10 pr-4 py-2.5 rounded-xl border border-white/20 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                />
+              </div>
+              <button
+                type="submit"
+                className="px-5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs transition shadow-lg flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>Fetch Patient</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+
+            {/* ABHA Patient Search Results Preview */}
+            {abhaSearchAttempted && (
+              <div className="mt-3 pt-3 border-t border-white/10">
+                {abhaSearchResult ? (
+                  <div className="p-3.5 rounded-2xl bg-white/10 border border-white/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 font-bold flex items-center justify-center text-sm border border-emerald-400/40">
+                        {abhaSearchResult.name ? abhaSearchResult.name.charAt(0) : 'P'}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-white text-sm">{abhaSearchResult.name}</span>
+                          <span className="px-2 py-0.5 rounded bg-teal-400/20 text-teal-200 font-mono text-[10px] font-bold">
+                            {abhaSearchResult.age || 46}y • {abhaSearchResult.gender || 'Male'}
+                          </span>
+                        </div>
+                        <p className="text-slate-300 text-[11px] mt-0.5 font-mono">
+                          ABHA: {abhaSearchResult.abhaId || 'Linked'} • ID: {abhaSearchResult.patientId || abhaSearchResult.id}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/doctor/patient/${abhaSearchResult.id || abhaSearchResult.patientId}`)}
+                      className="px-4 py-2 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs transition shadow flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <span>Open Clinical Record</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-cobalt" />
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-xs text-amber-300 font-semibold italic py-1">
+                    No matching patient record found for "{abhaSearchInput}". Search by exact ABHA ID e.g. ABHA-1234-5678 or 91-8842-1920-4491.
+                  </p>
+                )}
+              </div>
+            )}
           </motion.div>
 
           {/* OPD Live Metrics Strip from Stitch Screen 13 */}
@@ -493,6 +667,153 @@ export default function DoctorDashboard() {
           </motion.div>
         </motion.div>
       </main>
+
+      {/* 🏥 DOCTOR PROFILE SWITCHER & HPR REGISTRATION MODAL */}
+      {showDoctorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs select-none">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-cobalt text-white flex items-center justify-center font-bold">
+                  <Stethoscope className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base font-heading">
+                    Switch Attending Physician Profile
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    ABDM Healthcare Professional Registry (HPR) Verified Doctor Credentials
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowDoctorModal(false)}
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Presets List */}
+            <div className="space-y-2 mb-5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                Select Attending Physician Profile:
+              </label>
+              {AVAILABLE_DOCTORS.map((doc) => {
+                const isSelected = activeDoctor.hprId === doc.hprId
+                return (
+                  <button
+                    key={doc.id}
+                    type="button"
+                    onClick={() => {
+                      saveActiveDoctor(doc)
+                      setActiveDoctor(doc)
+                      setShowDoctorModal(false)
+                    }}
+                    className={`w-full text-left p-3.5 rounded-2xl border transition flex items-center justify-between cursor-pointer ${
+                      isSelected
+                        ? 'bg-cobalt-soft/40 border-cobalt text-slate-900 shadow-xs'
+                        : 'bg-slate-50 hover:bg-slate-100 border-slate-200/80 text-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs ${
+                        isSelected ? 'bg-cobalt text-white' : 'bg-slate-200 text-slate-700'
+                      }`}>
+                        {doc.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-slate-900">{doc.name}</span>
+                          <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-mono font-bold border border-emerald-200">
+                            {doc.hprId}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 font-medium mt-0.5">
+                          {doc.specialty} • {doc.department}
+                        </p>
+                      </div>
+                    </div>
+                    {isSelected && (
+                      <span className="w-6 h-6 rounded-full bg-cobalt text-white flex items-center justify-center text-xs font-bold">
+                        ✓
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Custom Doctor Input Form */}
+            <div className="pt-4 border-t border-slate-100">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-2">
+                Or Enter Custom Doctor Credentials:
+              </label>
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Doctor Name</label>
+                  <input
+                    type="text"
+                    value={customDoctorName}
+                    onChange={(e) => setCustomDoctorName(e.target.value)}
+                    placeholder="e.g. Dr. Ramesh Gupta"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 font-medium focus:ring-2 focus:ring-cobalt focus:outline-none"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Specialty</label>
+                    <input
+                      type="text"
+                      value={customSpecialty}
+                      onChange={(e) => setCustomSpecialty(e.target.value)}
+                      placeholder="e.g. General Medicine"
+                      className="w-full p-2.5 rounded-xl border border-slate-200 font-medium focus:ring-2 focus:ring-cobalt focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">HPR Registration ID</label>
+                    <input
+                      type="text"
+                      value={customHprId}
+                      onChange={(e) => setCustomHprId(e.target.value)}
+                      placeholder="e.g. HPR-IND-77123"
+                      className="w-full p-2.5 rounded-xl border border-slate-200 font-medium focus:ring-2 focus:ring-cobalt focus:outline-none"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  disabled={!customDoctorName.trim()}
+                  onClick={() => {
+                    const customDoc = {
+                      id: `custom-${Date.now()}`,
+                      name: customDoctorName.trim(),
+                      specialty: customSpecialty.trim() || 'General Physician',
+                      hprId: customHprId.trim() || 'HPR-IND-CUSTOM',
+                      department: 'OPD Room • Medical Center',
+                      hospital: 'Government Civil Hospital',
+                      email: 'doctor@arogyadarpan.gov.in',
+                    }
+                    saveActiveDoctor(customDoc)
+                    setActiveDoctor(customDoc)
+                    setShowDoctorModal(false)
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition shadow cursor-pointer disabled:opacity-50"
+                >
+                  Save & Set Active Physician
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }

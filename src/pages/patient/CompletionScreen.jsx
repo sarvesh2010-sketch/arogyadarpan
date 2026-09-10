@@ -5,7 +5,7 @@ import {
   CheckCircle2, ArrowRight, RefreshCw, QrCode, Sparkles, Loader2, Globe, FileText
 } from 'lucide-react'
 import StitchAppHeader from '../../components/StitchAppHeader'
-import { clearPatientSession, getActivePatient } from '../../services/sessionStore'
+import { clearPatientSession, getActivePatient, getActiveDoctor } from '../../services/sessionStore'
 import { generateAsyncLlamaHPI } from '../../services/hpiEngine'
 import { useLanguage } from '../../context/LanguageContext'
 
@@ -13,6 +13,7 @@ export default function CompletionScreen() {
   const navigate = useNavigate()
   const { t } = useLanguage()
   const patient = getActivePatient()
+  const activeDoctor = getActiveDoctor()
 
   const [showQrModal, setShowQrModal] = useState(false)
   const [llamaSummary, setLlamaSummary] = useState(null)
@@ -114,7 +115,7 @@ export default function CompletionScreen() {
               आपकी तैयारी पूरी हो गई है
             </span>
             <p className="text-xs text-slate-600 mt-1 max-w-[340px] leading-relaxed">
-              Your complete bilingual clinical summary is already synced with Dr. Ananya Sharma's workstation tablet.
+              Your complete bilingual clinical summary is already synced with {activeDoctor.name}'s workstation tablet.
             </p>
           </div>
 
@@ -267,8 +268,8 @@ export default function CompletionScreen() {
                     <span className="material-symbols-outlined text-[20px]">stethoscope</span>
                   </div>
                   <div>
-                    <div className="font-heading font-bold text-xs text-slate-900 leading-tight">Dr. Ananya Sharma</div>
-                    <div className="text-[11px] text-slate-500">Consultant Cardiologist • DM (Card)</div>
+                    <div className="font-heading font-bold text-xs text-slate-900 leading-tight">{activeDoctor.name}</div>
+                    <div className="text-[11px] text-slate-500">{activeDoctor.specialty} • HPR: {activeDoctor.hprId}</div>
                   </div>
                 </div>
                 <span className="material-symbols-outlined text-teal-700 text-[18px]">verified_user</span>

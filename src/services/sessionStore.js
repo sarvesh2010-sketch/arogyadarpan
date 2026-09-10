@@ -786,3 +786,110 @@ export function getAllDoctorPatients(demoPatients = []) {
   return demoPatients
 }
 
+// Preset Doctor Profiles for Multi-Specialty OPD & AYUSH Console
+export const AVAILABLE_DOCTORS = [
+  {
+    id: 'doc-001',
+    name: 'Dr. Rajesh Sharma',
+    specialty: 'General Medicine / Internal Medicine',
+    hprId: 'HPR-IND-90214',
+    department: 'OPD Room 12 • General Medicine',
+    hospital: 'AIIMS / District Civil Hospital',
+    email: 'dr.sharma@arogyadarpan.gov.in',
+  },
+  {
+    id: 'doc-002',
+    name: 'Dr. Ananya Iyer',
+    specialty: 'Cardiology',
+    hprId: 'HPR-IND-84920',
+    department: 'Cardiology OPD • Room 04',
+    hospital: 'All India Institute of Medical Sciences',
+    email: 'dr.iyer@arogyadarpan.gov.in',
+  },
+  {
+    id: 'doc-003',
+    name: 'Vaidya Anand Varma',
+    specialty: 'Ayurvedic Medicine & Kayachikitsa',
+    hprId: 'HPR-AYUSH-10492',
+    department: 'AYUSH Holistic Wellness Center',
+    hospital: 'All India Institute of Ayurveda (AIIA)',
+    email: 'v.varma@ayush.gov.in',
+  },
+  {
+    id: 'doc-004',
+    name: 'Dr. Priya Nair',
+    specialty: 'Pediatrics & Adolescent Care',
+    hprId: 'HPR-IND-39201',
+    department: 'Pediatrics OPD • Block B',
+    hospital: 'Government General Hospital',
+    email: 'dr.nair@arogyadarpan.gov.in',
+  },
+  {
+    id: 'doc-005',
+    name: 'Dr. Vikramaditya Sen',
+    specialty: 'General Surgery & Trauma',
+    hprId: 'HPR-IND-49102',
+    department: 'Surgical OPD • Trauma Wing',
+    hospital: 'District Civil Hospital',
+    email: 'dr.sen@arogyadarpan.gov.in',
+  },
+]
+
+/**
+ * Retrieve active doctor profile from localStorage or default
+ */
+export function getActiveDoctor() {
+  try {
+    const stored = localStorage.getItem('arogya_active_doctor')
+    if (stored) return JSON.parse(stored)
+  } catch (e) {
+    console.warn('Doctor profile retrieve error:', e)
+  }
+  return AVAILABLE_DOCTORS[0]
+}
+
+/**
+ * Save active doctor profile to localStorage
+ */
+export function saveActiveDoctor(doctorData) {
+  try {
+    localStorage.setItem('arogya_active_doctor', JSON.stringify(doctorData))
+  } catch (e) {
+    console.warn('Doctor profile save error:', e)
+  }
+  return doctorData
+}
+
+/**
+ * Universal Patient Search by ABHA ID, Mobile Number, or Patient ID
+ */
+export function searchPatientByAbhaOrId(query = '') {
+  if (!query || query.trim().length === 0) return null
+
+  const cleanQuery = query.trim().toLowerCase().replace(/\s+/g, '')
+
+  // 1. Check live active session patient first
+  const activeP = getActivePatient()
+  if (activeP && activeP.abhaId && activeP.abhaId.toLowerCase().replace(/\s+/g, '').includes(cleanQuery)) {
+    return activeP
+  }
+
+  // 2. Check registered patients
+  const regList = getRegisteredPatients()
+  const foundReg = regList.find(p =>
+    (p.abhaId && p.abhaId.toLowerCase().replace(/\s+/g, '').includes(cleanQuery)) ||
+    (p.patientId && p.patientId.toLowerCase().includes(cleanQuery)) ||
+    (p.phone && p.phone.includes(cleanQuery))
+  )
+  if (foundReg) return foundReg
+
+  // 3. Check demo patients
+  const demoList = getDemoPatient('demo-001')
+  if (demoList && demoList.abhaId && demoList.abhaId.toLowerCase().includes(cleanQuery)) {
+    return demoList
+  }
+
+  return null
+}
+
+

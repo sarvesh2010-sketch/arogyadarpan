@@ -17,8 +17,10 @@ import {
 } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import StitchAppHeader from '../../components/StitchAppHeader'
+import { getActiveDoctor } from '../../services/sessionStore'
 
 export default function ConsentScreen() {
+  const activeDoctor = getActiveDoctor()
   const [agreed, setAgreed] = useState(false)
   const [isPlayingAudio, setIsPlayingAudio] = useState(false)
   const [audioSeconds, setAudioSeconds] = useState(0)
@@ -53,8 +55,8 @@ export default function ConsentScreen() {
       setIsPlayingAudio(true)
       const textToSpeak =
         lang === 'hi'
-          ? 'नमस्ते। आपका स्वास्थ्य डेटा पूरी तरह सुरक्षित है। आरोग्यदर्पण आपकी समस्या और लक्षणों को डॉक्टर शर्मा के लिए तैयार करता है। अंतिम निर्णय और दवा का अधिकार केवल आपके डॉक्टर का है। आप जब चाहें अपनी जानकारी बदल या हटा सकते हैं।'
-          : 'Hello. Your health data remains completely secure. ArogyaDarpan structures your symptoms for Dr. Sharma. 100% of final diagnosis and prescription rests with your doctor. You can edit or redact your information anytime.'
+          ? `नमस्ते। आपका स्वास्थ्य डेटा पूरी तरह सुरक्षित है। आरोग्यदर्पण आपकी समस्या और लक्षणों को ${activeDoctor.name} के लिए तैयार करता है। अंतिम निर्णय और दवा का अधिकार केवल आपके डॉक्टर का है। आप जब चाहें अपनी जानकारी बदल या हटा सकते हैं।`
+          : `Hello. Your health data remains completely secure. ArogyaDarpan structures your symptoms for ${activeDoctor.name}. 100% of final diagnosis and prescription rests with your doctor. You can edit or redact your information anytime.`
 
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel()
@@ -279,8 +281,8 @@ export default function ConsentScreen() {
                 🩺
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="font-bold text-slate-900 text-sm truncate">Dr. Ananya Sharma, MD</span>
-                <span className="text-xs text-slate-600 truncate">Internal Medicine • Safdarjung OPD Unit 4</span>
+                <span className="font-bold text-slate-900 text-sm truncate">{activeDoctor.name}</span>
+                <span className="text-xs text-slate-600 truncate">{activeDoctor.specialty} • {activeDoctor.department || 'OPD Unit'}</span>
               </div>
             </div>
           </div>
@@ -303,7 +305,7 @@ export default function ConsentScreen() {
             </div>
             <div className="flex flex-col gap-0.5 min-w-0">
               <p className="text-xs sm:text-sm font-semibold text-slate-900 leading-snug">
-                I understand and consent to share my structured intake summary with Dr. Ananya Sharma for today’s OPD consultation.
+                I understand and consent to share my structured intake summary with {activeDoctor.name} for today’s OPD consultation.
               </p>
               <p className="text-xs text-slate-500">
                 मैं समझता/समझती हूँ और परामर्श हेतु जानकारी साझा करने की अनुमति देता/देती हूँ।

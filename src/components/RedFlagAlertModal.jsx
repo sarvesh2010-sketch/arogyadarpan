@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle, Bell, PhoneCall, ShieldAlert, ArrowRight, CheckCircle2 } from 'lucide-react'
+import { getActiveDoctor } from '../services/sessionStore'
 
 export default function RedFlagAlertModal({
   isOpen,
@@ -9,6 +10,7 @@ export default function RedFlagAlertModal({
   onAcknowledge,
   lang = 'en',
 }) {
+  const activeDoctor = getActiveDoctor()
   // Play subtle warning audio chime on mount if permitted
   useEffect(() => {
     if (isOpen) {
@@ -78,8 +80,8 @@ export default function RedFlagAlertModal({
             <Bell className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
             <p className="leading-relaxed font-medium">
               {isHindi
-                ? 'हमने आपके परामर्श को डॉक्टर के डैशबोर्ड पर उच्च प्राथमिकता (🔴 High Priority) पर स्वचालित रूप से भेज दिया है।'
-                : 'We have automatically escalated your intake to Dr. Sharma as High Priority (🔴 Priority Review) in the clinic queue.'
+                ? `हमने आपके परामर्श को ${activeDoctor.name} के डैशबोर्ड पर उच्च प्राथमिकता (🔴 High Priority) पर स्वचालित रूप से भेज दिया है।`
+                : `We have automatically escalated your intake to ${activeDoctor.name} as High Priority (🔴 Priority Review) in the clinic queue.`
               }
             </p>
           </div>

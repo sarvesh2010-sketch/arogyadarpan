@@ -20,7 +20,8 @@ import {
   getActiveDocuments,
   getActiveResponses,
   buildDynamicTimeline,
-  clearPatientSession
+  clearPatientSession,
+  getActiveDoctor
 } from '../../services/sessionStore'
 import { generateHPI } from '../../services/hpiEngine'
 
@@ -33,6 +34,7 @@ export default function PatientDashboard() {
   const [docCategoryFilter, setDocCategoryFilter] = useState('all')
 
   const patient = useMemo(() => getActivePatient(), [])
+  const activeDoctor = useMemo(() => getActiveDoctor(), [])
   const documents = useMemo(() => getActiveDocuments(), [])
   const responses = useMemo(() => getActiveResponses(), [])
   const timelineEvents = useMemo(() => buildDynamicTimeline(), [])
@@ -86,20 +88,20 @@ export default function PatientDashboard() {
           <div className="flex items-center gap-4">
             <div className="relative flex-shrink-0">
               <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDI_vnaonz1_3Nzdgz6hH7_03cwDYwEEpn8cLmuZa2dxh3Jkp0OnCq5e7o5uB4JRzoWIQKylgRbAw_KLNFgpe9_mDpmSjJ2S_lWN7GJSU5JeVGai4MFaLdNKtIuvcmWh3mR_T1lNUxZr2E_YRz6A6U7gYMoB8TlhFSLDMoiM75Iiev51tQcz2lYsQrtc4gzki9DTUDp6XLhszNCJ05i59NiNzQuH5aV9eQC__mFxevP1t2XE3X09Arm"
-                alt="Dr. Ananya Sharma"
+                src={activeDoctor.avatar || "https://lh3.googleusercontent.com/aida-public/AB6AXuDI_vnaonz1_3Nzdgz6hH7_03cwDYwEEpn8cLmuZa2dxh3Jkp0OnCq5e7o5uB4JRzoWIQKylgRbAw_KLNFgpe9_mDpmSjJ2S_lWN7GJSU5JeVGai4MFaLdNKtIuvcmWh3mR_T1lNUxZr2E_YRz6A6U7gYMoB8TlhFSLDMoiM75Iiev51tQcz2lYsQrtc4gzki9DTUDp6XLhszNCJ05i59NiNzQuH5aV9eQC__mFxevP1t2XE3X09Arm"}
+                alt={activeDoctor.name}
                 className="w-14 h-14 rounded-2xl object-cover shadow-sm ring-2 ring-teal-500/20"
               />
               <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-white" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h3 className="font-heading font-bold text-base text-slate-900">Dr. Ananya Sharma</h3>
+                <h3 className="font-heading font-bold text-base text-slate-900">{activeDoctor.name}</h3>
                 <span className="text-teal-600 font-bold text-xs bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
-                  MD, Cardiology
+                  {activeDoctor.specialty}
                 </span>
               </div>
-              <p className="text-xs text-slate-600 mt-0.5">Apex Health Center, Room 204 • Today, 11:30 AM</p>
+              <p className="text-xs text-slate-600 mt-0.5">{activeDoctor.department || 'OPD Unit'} • HPR: {activeDoctor.hprId}</p>
               <div className="flex items-center gap-2 mt-1.5">
                 <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-emerald-700 bg-emerald-500/10 px-2 py-0.5 rounded-full">
                   <Clock className="size-3" /> Token #A-14 (In Queue)

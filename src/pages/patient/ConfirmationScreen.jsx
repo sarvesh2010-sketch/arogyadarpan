@@ -7,13 +7,14 @@ import {
   Sparkles, History, Mic
 } from 'lucide-react'
 import StitchAppHeader from '../../components/StitchAppHeader'
-import { getActivePatient, buildDynamicConfirmationItems } from '../../services/sessionStore'
+import { getActivePatient, buildDynamicConfirmationItems, getActiveDoctor } from '../../services/sessionStore'
 import { useLanguage } from '../../context/LanguageContext'
 
 export default function ConfirmationScreen() {
   const navigate = useNavigate()
   const { t } = useLanguage()
   const patient = getActivePatient()
+  const activeDoctor = getActiveDoctor()
 
   // Dynamically build confirmation items from active interview responses & OCR
   const initialItems = useMemo(() => buildDynamicConfirmationItems(), [])
@@ -58,7 +59,7 @@ export default function ConfirmationScreen() {
                 {t('letsConfirm', "Let's Confirm What We Understood")}
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-                Review your clinical intake before it is securely encrypted and submitted to <span className="font-semibold text-teal-700">Dr. Ananya Sharma</span>.
+                Review your clinical intake before it is securely encrypted and submitted to <span className="font-semibold text-teal-700">{activeDoctor.name}</span>.
               </p>
             </div>
           </div>
@@ -67,18 +68,18 @@ export default function ConfirmationScreen() {
           <div className="p-4 rounded-2xl bg-white shadow-xs border border-slate-200/80 flex items-center gap-3.5">
             <div className="relative flex-shrink-0">
               <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDI_vnaonz1_3Nzdgz6hH7_03cwDYwEEpn8cLmuZa2dxh3Jkp0OnCq5e7o5uB4JRzoWIQKylgRbAw_KLNFgpe9_mDpmSjJ2S_lWN7GJSU5JeVGai4MFaLdNKtIuvcmWh3mR_T1lNUxZr2E_YRz6A6U7gYMoB8TlhFSLDMoiM75Iiev51tQcz2lYsQrtc4gzki9DTUDp6XLhszNCJ05i59NiNzQuH5aV9eQC__mFxevP1t2XE3X09Arm"
-                alt="Dr. Ananya Sharma"
+                src={activeDoctor.avatar || "https://lh3.googleusercontent.com/aida-public/AB6AXuDI_vnaonz1_3Nzdgz6hH7_03cwDYwEEpn8cLmuZa2dxh3Jkp0OnCq5e7o5uB4JRzoWIQKylgRbAw_KLNFgpe9_mDpmSjJ2S_lWN7GJSU5JeVGai4MFaLdNKtIuvcmWh3mR_T1lNUxZr2E_YRz6A6U7gYMoB8TlhFSLDMoiM75Iiev51tQcz2lYsQrtc4gzki9DTUDp6XLhszNCJ05i59NiNzQuH5aV9eQC__mFxevP1t2XE3X09Arm"}
+                alt={activeDoctor.name}
                 className="w-12 h-12 rounded-full object-cover shadow-xs ring-2 ring-teal-500/20"
               />
               <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white" />
             </div>
             <div className="flex flex-col min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <span className="font-heading font-bold text-sm text-slate-900 truncate">Dr. Ananya Sharma</span>
+                <span className="font-heading font-bold text-sm text-slate-900 truncate">{activeDoctor.name}</span>
                 <span className="text-teal-600 inline-flex items-center text-xs">✓</span>
               </div>
-              <p className="text-xs text-slate-500 truncate">Consultant Cardiologist • Apex Health Center</p>
+              <p className="text-xs text-slate-500 truncate">{activeDoctor.specialty} • {activeDoctor.department || 'Consultant'}</p>
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="inline-flex items-center gap-1 text-[11px] font-mono text-teal-700 font-semibold">
                   <Clock className="size-3" /> Next In Queue (~12 min wait)
@@ -143,7 +144,7 @@ export default function ConfirmationScreen() {
 
             {/* Reassurance Message */}
             <p className="text-xs text-slate-700 leading-snug mb-3">
-              💡 We highlighted this discrepancy so Dr. Sharma can double-check with you in person before prescribing antibiotics.
+              💡 We highlighted this discrepancy so {activeDoctor.name} can double-check with you in person before prescribing antibiotics.
             </p>
 
             {/* Action Chips */}
@@ -221,7 +222,7 @@ export default function ConfirmationScreen() {
               onClick={() => navigate('/patient/complete')}
               className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-heading font-bold text-base shadow-teal-glow active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>Confirm & Lock Intake for Dr. Sharma</span>
+              <span>Confirm & Lock Intake for {activeDoctor.name}</span>
               <ArrowRight className="size-5" />
             </button>
           </div>

@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import StitchAppHeader from '../../components/StitchAppHeader'
 import Timeline from '../../components/Timeline'
-import { getActivePatient } from '../../services/sessionStore'
+import { getActivePatient, getActiveDoctor } from '../../services/sessionStore'
 import { useLanguage } from '../../context/LanguageContext'
 
 export default function DocumentReview() {
   const navigate = useNavigate()
   const { t } = useLanguage()
   const patient = getActivePatient()
+  const activeDoctor = getActiveDoctor()
 
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeBbox, setActiveBbox] = useState(null)
@@ -320,7 +321,7 @@ export default function DocumentReview() {
           <div className="flex flex-col gap-0.5">
             <span className="font-heading font-bold text-xs text-slate-900">Human Doctor Review Guard</span>
             <p className="text-[11px] text-slate-600 leading-relaxed">
-              Dr. Ananya Sharma will review original scans alongside these extracted items (ABDM FHIR R4 Ready). No prescription is dispatched without clinical validation.
+              {activeDoctor.name} will review original scans alongside these extracted items (ABDM FHIR R4 Ready). No prescription is dispatched without clinical validation.
             </p>
           </div>
         </div>

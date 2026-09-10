@@ -15,7 +15,7 @@ const DEFAULT_TIMELINE_EVENTS = [
     alertIcon: 'crisis_alert',
     alertColor: 'text-amber-500',
     symptomCluster: "Retrosternal pressure radiating to left arm, 2-day duration. Intensifies on exertion.",
-    doctor: "Dr. Ananya Sharma",
+    doctor: "Attending Physician",
     clinic: "General Medicine OP #4",
     vitals: [
       { label: 'SPO2 SATURATION', value: '97% Room Air' },

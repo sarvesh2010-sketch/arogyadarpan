@@ -24,6 +24,7 @@ import TouchNumericKeypad from '../../components/TouchNumericKeypad'
 import TouchDatePicker from '../../components/TouchDatePicker'
 import SessionTimeoutModal from '../../components/SessionTimeoutModal'
 import ClinicalHistoryFormView from '../../components/ClinicalHistoryFormView'
+import OtherComplaintModal from '../../components/OtherComplaintModal'
 import { useInterview } from '../../hooks/useInterview'
 import { useVoiceInput } from '../../hooks/useVoiceInput'
 import { useSessionTimeout } from '../../hooks/useSessionTimeout'
@@ -39,6 +40,7 @@ export default function InterviewScreen() {
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [showFullForm, setShowFullForm] = useState(false)
   const [showEndSessionConfirm, setShowEndSessionConfirm] = useState(false)
+  const [showOtherComplaintModal, setShowOtherComplaintModal] = useState(false)
 
   const {
     currentQuestion,
@@ -408,9 +410,34 @@ export default function InterviewScreen() {
   }
 
   const handleComplaintSelect = (complaintId) => {
+    if (complaintId === 'other') {
+      setShowOtherComplaintModal(true)
+      return
+    }
     submitResponse('chief_complaint', '', complaintId, 'touch')
     setTextInput('')
     setTimeout(nextQuestion, 250)
+  }
+
+  const handleOtherComplaintSubmit = (structuredResult) => {
+    const complaintId = structuredResult.complaintId || 'other_custom'
+    const complaintLabel = structuredResult.complaintLabel || structuredResult.rawText || 'Other'
+    // Store raw text as the voice transcript, and structured id as the value
+    submitResponse('chief_complaint', structuredResult.rawText || complaintLabel, complaintLabel, 'voice')
+    // If there are associated symptoms, store them too
+    if (structuredResult.associatedSymptoms && structuredResult.associatedSymptoms.length > 0) {
+      const assocStr = structuredResult.associatedSymptoms.map(s => s.label || s).join(', ')
+      submitResponse('socrates_associations', assocStr, assocStr, 'voice')
+    }
+    if (structuredResult.duration) {
+      submitResponse('socrates_onset', structuredResult.duration, structuredResult.duration, 'voice')
+    }
+    if (structuredResult.severity) {
+      submitResponse('socrates_severity', String(structuredResult.severity), String(structuredResult.severity), 'voice')
+    }
+    setTextInput('')
+    setShowOtherComplaintModal(false)
+    setTimeout(nextQuestion, 350)
   }
 
   const questionText = getLocalizedQuestion(currentQuestion, lang)
@@ -587,10 +614,15 @@ export default function InterviewScreen() {
                             key={opt.id}
                             type="button"
                             onClick={() => handleComplaintSelect(opt.id)}
-                            className="glass-card tile-lift p-2.5 text-left text-xs font-bold text-slate-800 border border-slate-200/70 hover:border-cobalt transition cursor-pointer"
+                            className={`tile-lift p-2.5 text-left text-xs font-bold border transition cursor-pointer rounded-xl ${
+                              opt.id === 'other'
+                                ? 'bg-gradient-to-br from-violet-600 to-indigo-600 text-white border-violet-500 shadow-md hover:brightness-110 flex items-center gap-1.5'
+                                : 'glass-card text-slate-800 border-slate-200/70 hover:border-cobalt bg-white'
+                            }`}
                           >
-                            <span className="text-base mr-1.5">{opt.icon}</span>
+                            <span className="text-base mr-1">{opt.icon}</span>
                             {opt.labels && opt.labels[lang] ? opt.labels[lang] : opt.label}
+                            {opt.id === 'other' && <span className="ml-auto text-[10px] opacity-80">🎙️ Speak / Type</span>}
                           </button>
                         ))}
                       </div>
@@ -928,6 +960,13 @@ export default function InterviewScreen() {
             setAcknowledgedRedFlags(prev => [...prev, activeRedFlag.id])
           }
         }}
+      />
+      {/* Other / Custom Complaint Modal — Voice + Text + Groq AI */}
+      <OtherComplaintModal
+        isOpen={showOtherComplaintModal}
+        onClose={() => setShowOtherComplaintModal(false)}
+        onSubmit={handleOtherComplaintSubmit}
+        lang={lang}
       />
     </BionicKioskShell>
   )

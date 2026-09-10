@@ -20,7 +20,7 @@ import DocumentInspectorModal from '../../components/DocumentInspectorModal'
 import DrugSafetyBanner from '../../components/DrugSafetyBanner'
 import DifferentialDiagnosisWidget from '../../components/DifferentialDiagnosisWidget'
 import { getDemoPatient } from '../../data/demoPatients'
-import { getActivePatientAsDoctorRecord } from '../../services/sessionStore'
+import { getActivePatientAsDoctorRecord, getActiveDoctor } from '../../services/sessionStore'
 import { prepareFHIRBundle } from '../../services/abdmService'
 import { generateDifferentialDiagnosis, generateAsyncDifferentialDiagnosis } from '../../services/differentialEngine'
 
@@ -47,6 +47,7 @@ export default function PatientDetail() {
   const [activeInspectorDoc, setActiveInspectorDoc] = useState(null)
   const [fhirModalOpen, setFhirModalOpen] = useState(false)
 
+  const activeDoctor = getActiveDoctor()
   const liveRecord = getActivePatientAsDoctorRecord()
   const patient = (liveRecord && (id === liveRecord.id || id === 'live-kiosk-patient'))
     ? liveRecord
@@ -270,7 +271,7 @@ export default function PatientDetail() {
                     Clinical Decision Station
                   </span>
                 </div>
-                <span className="text-[11px] text-slate-500 font-medium">Dr. Ananya Sharma • OPD Room 204</span>
+                <span className="text-[11px] text-slate-500 font-medium">{activeDoctor.name} • {activeDoctor.department || activeDoctor.specialty} • HPR: {activeDoctor.hprId}</span>
               </div>
             </div>
           </div>
