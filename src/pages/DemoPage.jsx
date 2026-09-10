@@ -23,32 +23,29 @@ export default function DemoPage() {
   const navigate = useNavigate()
   const { t } = useLanguage()
 
+  const getDemoPatient = () => getRegisteredPatients()[0] || {
+    patientId: 'pt_00291',
+    name: 'Rahul Sharma',
+    age: '46',
+    gender: 'Male',
+    phone: '9876543210',
+    abhaId: '91-4829-1029',
+    bloodGroup: 'B+',
+  }
+
   const handleStartPatientDemo = () => {
-    const demoPatient = getRegisteredPatients()[0] || {
-      patientId: 'pt_00291',
-      name: 'Rahul Sharma',
-      age: '46',
-      gender: 'Male',
-      phone: '9876543210',
-      abhaId: '91-4829-1029',
-      bloodGroup: 'B+',
-    }
-    loginPatient(demoPatient)
+    loginPatient(getDemoPatient())
     navigate('/kiosk')
   }
 
   const handleStartGoldenPath = () => {
-    const demoPatient = getRegisteredPatients()[0] || {
-      patientId: 'pt_00291',
-      name: 'Rahul Sharma',
-      age: '46',
-      gender: 'Male',
-      phone: '9876543210',
-      abhaId: '91-4829-1029',
-      bloodGroup: 'B+',
-    }
-    loginPatient(demoPatient)
+    loginPatient(getDemoPatient())
     navigate('/kiosk')
+  }
+
+  const handleDirectToInterview = () => {
+    loginPatient(getDemoPatient())
+    navigate('/patient/interview')
   }
 
   return (
@@ -58,7 +55,7 @@ export default function DemoPage() {
         <nav className="flex items-center justify-between max-w-7xl mx-auto">
           {/* Logo */}
           <div
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/landing')}
             className="flex items-center gap-3 cursor-pointer"
           >
             <div className="size-10 rounded-2xl bg-gradient-to-tr from-cobalt to-cobalt-deep flex items-center justify-center shadow-cobalt text-white font-extrabold text-base">
@@ -92,7 +89,7 @@ export default function DemoPage() {
               <span>Doctor Portal</span>
             </button>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/landing')}
               className="btn-bionic-outline px-3.5 py-1.5 text-xs font-bold flex items-center gap-1.5"
             >
               <ArrowLeft className="size-3.5" />
@@ -248,7 +245,7 @@ export default function DemoPage() {
                 <ArrowRight className="size-4" />
               </button>
               <button
-                onClick={() => navigate('/patient/interview')}
+                onClick={handleDirectToInterview}
                 className="btn-bionic-outline w-full py-2.5 rounded-full text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5"
               >
                 <span>Direct to AI Clinical Interview</span>
@@ -310,7 +307,7 @@ export default function DemoPage() {
                 <ArrowRight className="size-4" />
               </button>
               <button
-                onClick={() => navigate('/doctor/patient/pt_00291')}
+                onClick={() => navigate('/doctor/patients/demo-001')}
                 className="btn-bionic-outline w-full py-2.5 rounded-full text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5"
               >
                 <span>Inspect Rahul Sharma's Dossier</span>
@@ -341,7 +338,7 @@ export default function DemoPage() {
               <span>Medical OCR Scanner</span>
             </button>
             <button
-              onClick={() => navigate('/patient/document-review')}
+              onClick={() => navigate('/patient/documents/review')}
               className="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex flex-col items-center gap-1.5 text-slate-800 font-bold transition cursor-pointer"
             >
               <History className="size-5 text-cobalt" />
@@ -360,7 +357,7 @@ export default function DemoPage() {
         {/* Back Link */}
         <div className="text-center">
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/landing')}
             className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-cobalt transition-colors cursor-pointer py-2 px-4 rounded-full hover:bg-white"
           >
             <ArrowLeft className="size-3.5" />

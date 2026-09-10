@@ -373,6 +373,17 @@ export default function CompletionScreen() {
             </button>
           </div>
 
+          {/* Patient Wellness Dashboard Shortcut */}
+          <button
+            type="button"
+            onClick={() => navigate('/patient/dashboard')}
+            className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-heading font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
+          >
+            <FileText className="size-4 text-teal-700" />
+            <span>View Patient Wellness Dashboard</span>
+            <ArrowRight className="size-3.5" />
+          </button>
+
           {/* Start New Session */}
           <div className="text-center pt-1">
             <button

@@ -34,7 +34,7 @@ const navItems = [
   { to: '/kiosk', label: 'Vitals & Overview', icon: HeartPulse },
   { to: '/patient/interview', label: 'AI Clinical Intake', icon: MessageSquareText },
   { to: '/patient/documents', label: 'Document Intelligence', icon: ScanLine },
-  { to: '/patient/document-review', label: 'Medical Timeline', icon: History },
+  { to: '/patient/documents/review', label: 'Medical Timeline', icon: History },
   { to: '/doctor', label: 'Doctor Review', icon: Stethoscope },
 ]
 
@@ -83,7 +83,7 @@ function NavRail() {
       </nav>
 
       <button
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/landing')}
         aria-label="Exit Kiosk"
         title="Exit to Portal Home"
         className="flex size-12 items-center justify-center rounded-2xl bg-white/80 text-slate-400 border border-slate-200/60 backdrop-blur transition hover:text-coral hover:bg-coral-soft cursor-pointer"
@@ -101,7 +101,7 @@ export function BottomNav() {
     { to: '/kiosk', label: 'Vitals', icon: HeartPulse },
     { to: '/patient/interview', label: 'Intake', icon: MessageSquareText },
     { to: '/patient/documents', label: 'OCR', icon: ScanLine },
-    { to: '/patient/document-review', label: 'Timeline', icon: History },
+    { to: '/patient/documents/review', label: 'Timeline', icon: History },
     { to: '/doctor', label: 'Doctor', icon: Stethoscope },
   ]
 

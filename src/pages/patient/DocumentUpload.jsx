@@ -134,7 +134,7 @@ export default function DocumentUpload() {
     try {
       localStorage.setItem('arogya_documents', JSON.stringify(documents))
     } catch { /* ignore */ }
-    navigate('/patient/document-review')
+    navigate('/patient/documents/review')
   }
 
   return (

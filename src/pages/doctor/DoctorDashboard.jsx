@@ -123,7 +123,7 @@ export default function DoctorDashboard() {
               <Sparkles className="size-3 text-cobalt ml-1" />
             </button>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/landing')}
               className="glass-pill p-2 text-slate-500 hover:text-coral hover:border-coral/40 transition cursor-pointer"
               title="Logout to Home"
             >
@@ -288,7 +288,7 @@ export default function DoctorDashboard() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => navigate(`/doctor/patient/${abhaSearchResult.id || abhaSearchResult.patientId}`)}
+                      onClick={() => navigate(`/doctor/patients/${abhaSearchResult.id || abhaSearchResult.patientId}`)}
                       className="px-4 py-2 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs transition shadow flex items-center gap-1.5 cursor-pointer"
                     >
                       <span>Open Clinical Record</span>
@@ -472,7 +472,7 @@ export default function DoctorDashboard() {
                       key={patient.id}
                       custom={i + 3}
                       variants={fadeIn}
-                      onClick={() => navigate(`/doctor/patient/${patient.id}`)}
+                      onClick={() => navigate(`/doctor/patients/${patient.id}`)}
                       className={`relative overflow-hidden rounded-2xl bg-white p-4 shadow-sm transition-all active:scale-[0.99] cursor-pointer border border-slate-200/80 ${
                         hasCritical
                           ? 'border-l-[6px] border-l-red-500 shadow-red-100'
@@ -600,7 +600,7 @@ export default function DoctorDashboard() {
                           key={patient.id}
                           custom={i + 3}
                           variants={fadeIn}
-                          onClick={() => navigate(`/doctor/patient/${patient.id}`)}
+                          onClick={() => navigate(`/doctor/patients/${patient.id}`)}
                           className={`grid grid-cols-12 gap-3 px-6 py-4 items-center border-b border-slate-100 last:border-b-0 hover:bg-cobalt-soft/20 cursor-pointer transition-colors ${
                             hasCritical ? 'bg-coral-soft/30 hover:bg-coral-soft/40' : ''
                           }`}

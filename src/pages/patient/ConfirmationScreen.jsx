@@ -31,7 +31,7 @@ export default function ConfirmationScreen() {
 
   return (
     <div className="min-h-screen bg-[#f7f9fb] text-slate-900 flex flex-col select-none pb-28 pb-safe">
-      <StitchAppHeader title="अंतिम पुष्टि (Final Confirmation)" showBack onBack={() => navigate('/patient/document-review')} />
+      <StitchAppHeader title="अंतिम पुष्टि (Final Confirmation)" showBack onBack={() => navigate('/patient/documents/review')} />
 
       <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-6">
         <motion.div

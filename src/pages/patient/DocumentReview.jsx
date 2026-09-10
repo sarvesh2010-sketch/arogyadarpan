@@ -336,7 +336,7 @@ export default function DocumentReview() {
           <div className="w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-white/60 p-2.5 flex flex-col gap-1.5">
             <button
               type="button"
-              onClick={() => navigate('/patient/confirmation')}
+              onClick={() => navigate('/patient/confirm')}
               className="w-full h-12 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-heading text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all cursor-pointer"
             >
               <span>Confirm Extracted Records & Proceed</span>

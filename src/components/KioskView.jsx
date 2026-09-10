@@ -408,10 +408,14 @@ function KioskContent() {
             </Link>
             <span className="text-slate-300">•</span>
             <Link
-              to="/patient/document-review"
+              to="/patient/documents/review"
               className="text-[10px] font-bold text-cobalt hover:underline"
             >
               Timeline
+            </Link>
+            <span className="text-slate-300">•</span>
+            <Link to="/patient/dashboard" className="text-[10px] font-bold text-cobalt hover:underline">
+              My Dashboard
             </Link>
             <span className="text-slate-300">•</span>
             <Link to="/doctor" className="text-[10px] font-bold text-cobalt hover:underline">

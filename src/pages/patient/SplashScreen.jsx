@@ -70,6 +70,20 @@ export default function SplashScreen({ onComplete }) {
 
           <div className="flex items-center gap-1.5">
             <button
+              onClick={() => navigate('/landing')}
+              className="px-2.5 py-1 rounded-full bg-white/75 hover:bg-white text-[10px] font-mono font-bold text-teal-800 border border-slate-200/80 shadow-2xs transition-all cursor-pointer"
+              title="Explore Platform"
+            >
+              Explore
+            </button>
+            <button
+              onClick={() => navigate('/demo')}
+              className="px-2.5 py-1 rounded-full bg-white/75 hover:bg-white text-[10px] font-mono font-bold text-slate-700 border border-slate-200/80 shadow-2xs transition-all cursor-pointer"
+              title="Quick Demo Suite"
+            >
+              Demo
+            </button>
+            <button
               onClick={() => navigate('/doctor')}
               className="px-2.5 py-1 rounded-full bg-white/75 hover:bg-white text-[10px] font-mono font-bold text-teal-800 border border-slate-200/80 shadow-2xs transition-all cursor-pointer"
               title="Doctor Console Access"

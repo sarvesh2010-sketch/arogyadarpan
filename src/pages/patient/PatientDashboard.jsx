@@ -80,7 +80,7 @@ export default function PatientDashboard() {
 
   return (
     <div className="min-h-screen bg-[#f7f9fb] text-slate-900 flex flex-col select-none pb-28 pb-safe">
-      <StitchAppHeader title="स्वास्थ्य केंद्र (Patient Wellness Hub)" showBack onBack={() => navigate('/')} />
+      <StitchAppHeader title="स्वास्थ्य केंद्र (Patient Wellness Hub)" showBack onBack={() => navigate('/patient/complete')} />
 
       <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
         {/* Stitch Upcoming Consultation Hero Card */}
@@ -279,7 +279,7 @@ export default function PatientDashboard() {
                 <Button variant="outline" size="sm" onClick={() => navigate('/patient/documents')}>
                   Add Documents
                 </Button>
-                <Button variant="primary" size="sm" onClick={() => navigate('/patient/confirmation')} iconRight={ArrowRight}>
+                <Button variant="primary" size="sm" onClick={() => navigate('/patient/confirm')} iconRight={ArrowRight}>
                   Review Clinical Summary
                 </Button>
               </div>
